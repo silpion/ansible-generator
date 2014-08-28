@@ -1,0 +1,56 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    - role_name: ""
+    - role_path: ""
+  tasks:
+    - name: Verify user input for variables
+      assert:
+        that:
+          - role_name != ""
+          - role_path != ""
+
+    - name: Install directories for Ansible TDD
+      with_items:
+        - rake
+        - spec/default
+        - spec/lib
+        - tests
+      local_action: file
+        state=directory
+        dest={{ role_path }}/{{ item }}
+
+    - name: Install static files for Ansible TDD
+      with_items:
+        - ansible.cfg
+        - Gemfile
+        - rake/docker.rb
+        - rake/vagrant.rb
+        - Rakefile
+        - spec/lib/docker.rb
+        - spec/lib/vagrant.rb
+        - spec/spec_helper.rb
+        - tests/hosts
+        - tests/silpion-insecure-private-key
+      local_action: copy
+        mode=0600
+        src=files/{{ item }}
+        dest={{ role_path }}/{{ item }}
+
+    - name: Install templates for Ansible TDD
+      with_items:
+        - tests/docker.yml
+        - tests/playbook.yml
+        - Vagrantfile
+      local_action: template
+        mode=0600
+        src=templates/{{ item }}.j2
+        dest={{ role_path }}/{{ item }}
+
+    - name: Install spec integration test file
+      tags: toast
+      local_action: copy
+        force=false
+        src=files/spec/default/rolename_spec.rb
+        dest={{ role_path }}/spec/default/{{ role_name }}_spec.rb
