@@ -11,6 +11,13 @@
           - role_name != ""
           - role_path != ""
 
+    - name: Install .gitignore
+      local_action: copy
+        mode=0600
+        force=false
+        src=files/.gitignore
+        dest={{ role_path }}/.gitignore
+
     - name: Install directories for Ansible TDD
       with_items:
         - rake
@@ -49,8 +56,8 @@
         dest={{ role_path }}/{{ item }}
 
     - name: Install spec integration test file
-      tags: toast
       local_action: copy
+        mode=0600
         force=false
         src=files/spec/default/rolename_spec.rb
         dest={{ role_path }}/spec/default/{{ role_name }}_spec.rb
