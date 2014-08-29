@@ -12,7 +12,7 @@ integration tests (spec/default/\<ROLENAME\>\_spec.rb).
 ## Variables
 
 This project requires two variables from the user which must be set
-using the ansible-playbook argument *-e* (*--extra-vars*). These are
+using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 
 * ``role_name``
 * ``role_path``
