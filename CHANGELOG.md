@@ -1,3 +1,7 @@
+# 0.1.2
+
+* Add --hostname option to docker run command
+
 # 0.1.1
 
 * Install .gitignore
