@@ -46,6 +46,7 @@
       with_items:
         - ansible.cfg
         - Gemfile
+        - LICENSE
         - rake/docker.rb
         - rake/vagrant.rb
         - Rakefile
