@@ -3,4 +3,4 @@
   sudo: yes
   sudo_user: root
   roles:
-    - { role: ansible-{{ role_name }} }
+    - { role: {{ role_prefix }}-{{ role_name }} }
