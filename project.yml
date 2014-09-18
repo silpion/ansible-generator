@@ -1,0 +1,17 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    - project_name: ""
+    - project_path: ""
+  tasks:
+    - name: Verify user input for required variables
+      assert:
+        that:
+          - project_name != ""
+          - project_path != ""
+
+    - name: Not implemented yet
+      debug:
+        msg="Not implemented yet"
