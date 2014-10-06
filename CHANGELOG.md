@@ -1,3 +1,8 @@
+# 0.2.1
+
+Mark Kusch (1):
+      Better collaborative .gitignore
+
 # 0.1.2
 
 * Add --hostname option to docker run command
