@@ -1,8 +1,5 @@
 ### Files to be ignored by Git ###
 
-# Ansible
-Gemfile.lock
-
 # Vagrant
 /\.vagrant/
 
