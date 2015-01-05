@@ -1,3 +1,10 @@
+# 0.3.0
+
+Mark Kusch (5):
+      Add Gemfile.lock to the repositories
+      Install a travis configuration in a role
+      Update spec_helper for Rspec/Specinfra 2.N
+
 # 0.2.1
 
 Mark Kusch (1):
