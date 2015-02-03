@@ -1,11 +1,5 @@
 ### Files to be ignored by Git ###
 
-# Ruby
-Gemfile.lock
-
-# Vagrant
-/\.vagrant/
-
 # IntelliJ IDEA
 /*\.ipr
 /*\.iws
