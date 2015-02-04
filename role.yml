@@ -32,9 +32,10 @@
         src=files/CHANGELOG.md
         dest={{ role_path }}/{{ role_prefix }}-{{ role_name }}/CHANGELOG.md
 
-    - name: Install directories for TDD
+    - name: Install directories
       with_items:
         - rake
+        - scripts
         - spec/default
         - spec/lib
         - tests
@@ -50,6 +51,7 @@
         - rake/docker.rb
         - rake/vagrant.rb
         - Rakefile
+        - scripts/release.sh
         - spec/lib/docker.rb
         - spec/lib/vagrant.rb
         - spec/spec_helper.rb
@@ -79,6 +81,14 @@
         force=false
         src=files/spec/default/rolename_spec.rb
         dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/spec/default/{{ role_name }}_spec.rb
+
+    - name: Install scripts
+      with_items:
+        - scripts/release.sh
+      local_action: copy
+        mode=0755
+        src=files/{{ item }}
+        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
 
     - name: git init...
       register: generater_git_init
