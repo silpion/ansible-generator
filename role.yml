@@ -6,6 +6,7 @@
     - role_name: ""
     - role_path: ""
     - role_prefix: 'ansible'
+    - vagrant_box_name: 'ubuntu/trusty64'
   tasks:
     - name: Verify user input for required variables
       assert:

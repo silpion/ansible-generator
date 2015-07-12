@@ -18,6 +18,7 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 * ``role_name``: Name of the role without prefix (string, default: ``<empty>``, **mandatory**)
 * ``role_path``: Base path of the role fed to *--init-path* from *ansible-galaxy init* (string, default: ``<empty>``, **mandatory**)
 * ``role_prefix``: Directory name prefix for the role (string, choices ['ansible', 'galaxy', 'silpion'], default: ``ansible``)
+* ``vagrant_box_name``: Name of the box to use for Vagrant integration testing (string, default: ``ubuntu/trusty64``)
 
 ### ansible-playbook
 
