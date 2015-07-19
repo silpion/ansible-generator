@@ -31,5 +31,11 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       v.customize [ 'modifyvm', :id, '--name', 'ansible{{ role_name }}test', '--memory', '512', '--cpus', '1' ]
     end
 
+    d.vm.provider :libvirt do |lv|
+      lv.memory = 1024
+      lv.cpus = 2
+    end
+
+
   end
 end
