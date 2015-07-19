@@ -48,7 +48,6 @@
         - Gemfile
         - LICENSE
         - rake/docker.rb
-        - rake/vagrant.rb
         - Rakefile
         - spec/lib/docker.rb
         - spec/lib/vagrant.rb
@@ -68,6 +67,8 @@
         - tests/playbook.yml
         - README.md
         - Vagrantfile
+        - envvars-vagrant.sample
+        - rake/vagrant.rb
       local_action: template
         mode=0600
         src=templates/{{ item }}.j2
