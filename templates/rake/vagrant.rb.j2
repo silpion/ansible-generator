@@ -4,7 +4,7 @@ require 'rspec/core/rake_task'
 
 desc "Bring up Vagrant VM"
 task :up do
-  sh %{vagrant up --no-provision}
+  sh 'vagrant', 'up', '--no-provision', '--provider', ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_PROVIDER']
 end
 
 
