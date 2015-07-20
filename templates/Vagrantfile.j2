@@ -5,7 +5,11 @@
 VAGRANT_API_VERSION = '2'
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
-  config.vm.box = ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_BOXNAME']
+  if ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_BOXNAME']
+    config.vm.box = ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_BOXNAME']
+  else
+    config.vm.box = 'ubuntu/trusty64'
+  end
 
   config.vm.define :ansible{{ role_name }}test do |d|
 
