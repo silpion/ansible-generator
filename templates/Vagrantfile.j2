@@ -5,7 +5,11 @@
 VAGRANT_API_VERSION = '2'
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
-  config.vm.box = 'ubuntu/trusty64'
+  if ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_BOXNAME']
+    config.vm.box = ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_BOXNAME']
+  else
+    config.vm.box = 'ubuntu/trusty64'
+  end
 
   config.vm.define :ansible{{ role_name.replace("-","") }}test do |d|
 
@@ -32,6 +36,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       v.customize 'pre-boot', ['modifyvm', :id, '--nictype1', 'virtio']
       v.customize [ 'modifyvm', :id, '--name', 'ansible{{ role_name.replace("-","") }}test', '--memory', '512', '--cpus', '1' ]
     end
+
+    d.vm.provider :libvirt do |lv|
+      lv.memory = 1024
+      lv.cpus = 2
+    end
+
 
   end
 end
