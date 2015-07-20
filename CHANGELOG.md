@@ -1,3 +1,25 @@
+# 0.4.0
+
+Alvaro Aleman (7):
+
+* Added options to set verbosity and skip\_tags to vagrantfile
+* Vagrantfile: Replacing dashes to avoid ruby substitution errors
+* vagrant box name parameterized using env vars
+* vagrant provider parameterized using env vars
+* vagrantfile: added config for libvirt provider
+* rake suite vagrant: Added parameter to prevent the vagrant box from getting destroyed after each run
+* Vagrant tdd: Added defaults for box and provider to keep behaviour consistent
+
+Marc Rohlfs (1):
+
+* First (quick and dirty) attempt of shell script to create releases.
+
+Mark Kusch (3):
+
+* Add minimal documentation for contributing
+* Ansible shall not write .retry files
+* Do not add .retry files
+
 # 0.3.1
 
 Marc Rohlfs (2):
