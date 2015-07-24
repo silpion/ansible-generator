@@ -2,7 +2,8 @@
 
 This Ansible project provides two playbooks to create Ansible
 infrastructure for roles or projects with TDD infrastructure
-integrated.
+integrated. It can also be used to add or update the TDD infrastucture
+for an existing role.
 
 * role.yml: create a role
 * project.yml create a  (project.yml)
@@ -18,6 +19,7 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 * ``role_name``: Name of the role without prefix (string, default: ``<empty>``, **mandatory**)
 * ``role_path``: Base path of the role fed to *--init-path* from *ansible-galaxy init* (string, default: ``<empty>``, **mandatory**)
 * ``role_prefix``: Directory name prefix for the role (string, choices ['ansible', 'galaxy', 'silpion'], default: ``ansible``)
+* ``update``: Wether to update the TDD functionality for an existing role (boolean, default: ``false``)
 
 ### ansible-playbook
 
