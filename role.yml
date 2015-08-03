@@ -69,16 +69,16 @@
     - name: Install templates
       with_items:
         - README.md
+        - tests/playbook.yml
       when: not update
       local_action: template
         mode=0600
-        src=template/{{ item }}.j2
+        src=templates/{{ item }}.j2
         dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
 
     - name: Install templates for TDD
       with_items:
         - tests/docker.yml
-        - tests/playbook.yml
         - Vagrantfile
         - envvars-vagrant.sample
         - rake/vagrant.rb
