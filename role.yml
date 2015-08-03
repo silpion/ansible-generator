@@ -58,7 +58,6 @@
         - Gemfile
         - rake/docker.rb
         - Rakefile
-        - scripts/release.sh
         - spec/lib/docker.rb
         - spec/lib/vagrant.rb
         - spec/spec_helper.rb
