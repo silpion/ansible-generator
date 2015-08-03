@@ -69,11 +69,11 @@
     - name: Install templates
       with_items:
         - README.md
+      when: not update
       local_action: template
         mode=0600
         src=template/{{ item }}.j2
         dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
-      when: not update
 
     - name: Install templates for TDD
       with_items:
