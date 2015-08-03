@@ -15,6 +15,10 @@
           - role_path != ""
           - role_prefix in ['ansible', 'galaxy', 'silpion']
 
+    - name: Set role_name_nodash
+      set_fact:
+        role_name_nodash="{{ role_name | replace("-","") }}"
+
     - name: Install Ansible role
       local_action: command ansible-galaxy init --init-path {{ role_path }} {{ role_prefix }}-{{ role_name }}
         creates={{ role_path }}/{{ role_prefix}}-{{ role_name }}
