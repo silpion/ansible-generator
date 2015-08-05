@@ -6,6 +6,7 @@
     - role_name: ""
     - role_path: ""
     - role_prefix: 'ansible'
+    - update: false
   tasks:
     - name: Verify user input for required variables
       assert:
@@ -13,6 +14,10 @@
           - role_name != ""
           - role_path != ""
           - role_prefix in ['ansible', 'galaxy', 'silpion']
+
+    - name: Set role_name_nodash
+      set_fact:
+        role_name_nodash="{{ role_name | replace("-","") }}"
 
     - name: Install Ansible role
       local_action: command ansible-galaxy init --init-path {{ role_path }} {{ role_prefix }}-{{ role_name }}
@@ -25,12 +30,16 @@
         src=files/.gitignore
         dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/.gitignore
 
-    - name: Install CHANGELOG.md
+    - name: Install static files
+      with_items:
+        - CHANGELOG.md
+        - LICENSE
+        - VERSION
       local_action: copy
         mode=0600
         force=false
         src=files/CHANGELOG.md
-        dest={{ role_path }}/{{ role_prefix }}-{{ role_name }}/CHANGELOG.md
+        dest={{ role_path }}/{{ role_prefix }}-{{ role_name }}/{{ item }}
 
     - name: Install directories
       with_items:
@@ -47,27 +56,32 @@
       with_items:
         - ansible.cfg
         - Gemfile
-        - LICENSE
         - rake/docker.rb
         - Rakefile
-        - scripts/release.sh
         - spec/lib/docker.rb
         - spec/lib/vagrant.rb
         - spec/spec_helper.rb
         - tests/hosts
         - tests/silpion-insecure-private-key
-        - VERSION
         - .travis.yml
       local_action: copy
         mode=0600
         src=files/{{ item }}
         dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
 
+    - name: Install templates
+      with_items:
+        - README.md
+        - tests/playbook.yml
+      when: not update
+      local_action: template
+        mode=0600
+        src=templates/{{ item }}.j2
+        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
+
     - name: Install templates for TDD
       with_items:
         - tests/docker.yml
-        - tests/playbook.yml
-        - README.md
         - Vagrantfile
         - envvars-vagrant.sample
         - rake/vagrant.rb

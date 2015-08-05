@@ -4,8 +4,8 @@ require 'rspec/core/rake_task'
 
 desc "Bring up Vagrant VM"
 task :up do
-  if ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_PROVIDER']
-    sh 'vagrant', 'up', '--no-provision', '--provider', ENV['{{ role_prefix|upper }}_{{ role_name|upper }}_VAGRANT_PROVIDER']
+  if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_PROVIDER']
+    sh 'vagrant', 'up', '--no-provision', '--provider', ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_PROVIDER']
   else
     sh %{vagrant up --no-provision}
   end
