@@ -1,3 +1,11 @@
+# 0.5.0
+
+Alvaro Aleman (5):
+
+* added update functionality
+* update functionality: removed tests/playbook.yml, typo fixed
+* added ruby friendly role\_name\_nodash and replaced role\_name with it where needed
+
 # 0.4.0
 
 Alvaro Aleman (7):
