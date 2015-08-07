@@ -1,3 +1,10 @@
+# 0.6.0
+
+Alvaro Aleman (2):
+
+* added vim \.*\.swp files to .gitignore for both this repo and created roles
+* TDD Vagrant: Added checkmode option, prefixed the various environment settings with $role\_name
+
 # 0.5.0
 
 Alvaro Aleman (5):
