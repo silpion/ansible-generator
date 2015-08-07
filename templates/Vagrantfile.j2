@@ -18,9 +18,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
     d.vm.provision :ansible do |ansible|
       ansible.playbook = 'tests/playbook.yml'
-      ansible.tags = ENV['ANSIBLE_TAGS']
-      ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
-      ansible.verbose = ENV['ANSIBLE_VERBOSE']
+      ansible.tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_TAGS']
+      ansible.skip_tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
+      ansible.verbose = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_VERBOSE']
+      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
+        ansible.raw_arguments = '--check'
+      end
       ansible.groups = {
         'vagrant' => ['ansible{{ role_name_nodash }}test']
       }
