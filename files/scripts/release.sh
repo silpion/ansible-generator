@@ -1,5 +1,9 @@
 #!/bin/sh
 
+##Always exit on $? -ne 0
+set -e
+##
+
 ##### Create a release for a project managed with a Git repository #####
 
 
