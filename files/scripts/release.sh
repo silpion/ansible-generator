@@ -25,7 +25,7 @@ confirm() {
 
 
 
-### Initialise the variables and settings ###
+### Initialize the variables and settings ###
 
 # Some information must be provided with command line args
 RELEASE_VERSION=$1
@@ -41,7 +41,7 @@ RELEASE_BRANCH="release/${RELEASE_VERSION}"
 
 # Confirm or exit
 echo
-echo "Setting for the release to be created:"
+echo "Settings for the release to be created:"
 echo "  Version of last release:  ${LAST_VERSION}"
 echo "  Version of new release:   ${RELEASE_VERSION}"
 echo "  Name of Git repository:   ${REPOSITORY_NAME}"
@@ -52,7 +52,7 @@ fi
 
 
 
-### Preform release ###
+### Perform release ###
 
 echo
 echo "Checkout and pull next branch"
@@ -61,7 +61,7 @@ git pull
 
 echo
 echo "Checkout new release branch"
-git co -b ${RELEASE_BRANCH}
+git checkout -b ${RELEASE_BRANCH}
 
 echo
 echo "Write VERSION file"
@@ -94,7 +94,6 @@ git pull
 
 echo
 echo "Merge release branch to master branch"
-#git merge --no-ff --log $RELEASE_BRANCH
 git merge --no-ff --log --no-edit ${RELEASE_BRANCH}
 
 echo
