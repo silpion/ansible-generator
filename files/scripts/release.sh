@@ -33,6 +33,8 @@ fi
 
 
 ### Initialize the variables and settings ###
+#Variables
+FILENAME_TMPCHANGELOG='releasescripttmp_CHANGELOG.md'
 
 # Some information must be provided with command line args
 RELEASE_VERSION=$1
@@ -64,7 +66,7 @@ fi
 echo
 echo "Checkout and pull next branch"
 git checkout next
-git pull
+git pull origin next
 
 echo
 echo "Checkout new release branch"
@@ -75,21 +77,39 @@ echo "Write VERSION file"
 echo ${RELEASE_VERSION} > VERSION
 
 echo
-echo "Append version information to CHANGELOG.md file"
-echo "# ${RELEASE_VERSION}" >> CHANGELOG.md
+echo "Add release information to CHANGELOG.md file"
+
+cat CHANGELOG.md > $FILENAME_TMPCHANGELOG
+echo "# ${RELEASE_VERSION}" > CHANGELOG.md
 echo "" >> CHANGELOG.md
+
 if [ -n ${LAST_VERSION} ]; then
   git shortlog --no-merges next --not ${LAST_VERSION} | sed -e '/^[ \t]/s#^[ \t]*#* #' | perl -pe 's/:$/:\n/g' >> CHANGELOG.md
+  cat $FILENAME_TMPCHANGELOG >> CHANGELOG.md
 else
   git shortlog --no-merges next | sed -e '/^[ \t]/s#^[ \t]*#* #' | perl -pe 's/:$/:\n/g' >> CHANGELOG.md
+  cat $FILENAME_TMPCHANGELOG >> CHANGELOG.md
 fi
 echo "Please verify and adjust version information that was appended to CHANGELOG.md file"
+echo "Diff looks like this:"
+echo
+echo '###### Diff start ######'
+
+## Disable exit on $? -ne 0 for the diff command, since it returns $? == 1 if a diff was found
+set +e
+diff -u $FILENAME_TMPCHANGELOG CHANGELOG.md
+set -e
+
+echo '###### Diff end ######'
+echo
+echo "In case this is not correct, press ctrl+z to pause this script, adjust CHANGELOG.md and get back using the fg command"
 while ! confirm "Continue?"; do
   echo "And now?"
 done
 
 echo
 echo "Commit generated release information"
+rm -f $FILENAME_TMPCHANGELOG
 git add VERSION
 git add CHANGELOG.md
 git commit -m "${REPOSITORY_NAME} ${RELEASE_VERSION}: ${SHORT_SUMMARY}"
@@ -97,7 +117,7 @@ git commit -m "${REPOSITORY_NAME} ${RELEASE_VERSION}: ${SHORT_SUMMARY}"
 echo
 echo "Checkout and pull master branch"
 git checkout master
-git pull
+git pull origin master
 
 echo
 echo "Merge release branch to master branch"
