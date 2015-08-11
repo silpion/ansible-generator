@@ -23,6 +23,13 @@ confirm() {
   esac
 }
 
+### Display usage message
+if [ $# -ne 2 ]; then
+  >&2 echo "Usage:    $0 'ReleaseVersionNumber' 'One line summary of changes for this release'"
+  >&2 echo "Example:  $0 '1.0.0' 'Added initalization checks'"
+  exit 1
+fi
+
 
 
 ### Initialize the variables and settings ###
@@ -47,7 +54,7 @@ echo "  Version of new release:   ${RELEASE_VERSION}"
 echo "  Name of Git repository:   ${REPOSITORY_NAME}"
 echo "  Summary text for release: ${SHORT_SUMMARY}"
 if ! confirm "Continue with these settings?"; then
-  exit
+  exit 1
 fi
 
 
@@ -112,3 +119,4 @@ git branch -d ${RELEASE_BRANCH}
 echo
 echo "Push all changes to remote repository"
 git push origin master next ${RELEASE_VERSION}
+exit 0
