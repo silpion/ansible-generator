@@ -47,6 +47,17 @@ git fetch origin --tags
 LAST_VERSION=$( git tag -l | tail -n 1 )
 REPOSITORY_NAME=$( git remote show -n origin | grep Fetch | sed 's#.*/##' | sed 's/\.git//' )
 RELEASE_BRANCH="release/${RELEASE_VERSION}"
+EXISTING_TAGS=`git tag -l`
+
+# Temporary disabling exit on $? -ne 0 to be able to display error message
+set +e
+if [[ $EXISTING_TAGS =~ $RELEASE_VERSION ]]; then
+  >&2 echo "A tag $RELEASE_VERSION already exists!"
+  >&2 echo "Aborting.."
+  exit 1
+fi
+set -e
+
 
 # Confirm or exit
 echo
