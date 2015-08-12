@@ -1,8 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 ##Always exit on $? -ne 0
 set -e
 ##
+
+_cleanup()
+{
+  rm $FILENAME_TMPCHANGELOG &>/dev/null
+}
 
 ##### Create a release for a project managed with a Git repository #####
 
@@ -24,24 +29,39 @@ confirm() {
 }
 
 ### Display usage message
-if [ $# -ne 2 ]; then
-  >&2 echo "Usage:    $0 'ReleaseVersionNumber' 'One line summary of changes for this release'"
-  >&2 echo "Example:  $0 '1.0.0' 'Added initalization checks'"
-  exit 1
-fi
-
+usage () {
+  echo "Usage: $0 [-v VERSION] [-r REMOTE] -s 'One line summary of changes for this release'"
+  exit 0
+}
 
 
 ### Initialize the variables and settings ###
 #Variables
-FILENAME_TMPCHANGELOG='releasescripttmp_CHANGELOG.md'
+RELEASE_VERSION=
+REMOTE=
+SHORT_SUMMARY=
 
-# Some information must be provided with command line args
-RELEASE_VERSION=$1
-SHORT_SUMMARY=$2
+while getopts v:r:s: OPT; do
+  case $OPT in
+      v) RELEASE_VERSION="${OPTARG}";;
+      r) REMOTE="${OPTARG}";;
+      s) SHORT_SUMMARY="${OPTARG}";;
+  esac
+done
+shift $(( $OPTIND - 1 ));
+
+if [ -z "${SHORT_SUMMARY}" ]; then
+  usage && exit 0
+fi
+
+: ${REMOTE:=origin}
+
+FILENAME_TMPCHANGELOG="$( mktemp --suffix=ansible_role_release_changelog )"
+
+trap _cleanup ALRM HUP INT TERM EXIT
 
 # Fetch Git remote inormation
-git fetch origin --tags
+git fetch $REMOTE --tags
 
 # Some information can be detected
 LAST_VERSION=$( git tag -l | tail -n 1 )
@@ -49,9 +69,15 @@ REPOSITORY_NAME=$( git remote show -n origin | grep Fetch | sed 's#.*/##' | sed 
 RELEASE_BRANCH="release/${RELEASE_VERSION}"
 EXISTING_TAGS=`git tag -l`
 
-# Temporary disabling exit on $? -ne 0 to be able to display error message
+# Detect version if not provided by user
+if [[ -z "${RELEASE_VERSION}" ]]; then
+  RELEASE_VERSION=$(echo $LAST_VERSION|awk -F . '{print $1 "." $2 + 1 "." $3}')
+fi
+
+# Check if there is already a tag named $RELEASE_VERSION
+## Temporary disabling exit on $? -ne 0 to be able to display error message
 set +e
-if [[ $EXISTING_TAGS =~ $RELEASE_VERSION ]]; then
+if [[ $EXISTING_TAGS =~ "$RELEASE_VERSION" ]]; then
   >&2 echo "A tag $RELEASE_VERSION already exists!"
   >&2 echo "Aborting.."
   exit 1
@@ -77,7 +103,7 @@ fi
 echo
 echo "Checkout and pull next branch"
 git checkout next
-git pull origin next
+git pull $REMOTE next
 
 echo
 echo "Checkout new release branch"
@@ -94,14 +120,14 @@ cat CHANGELOG.md > $FILENAME_TMPCHANGELOG
 echo "# ${RELEASE_VERSION}" > CHANGELOG.md
 echo "" >> CHANGELOG.md
 
-if [ -n ${LAST_VERSION} ]; then
+if [[ -n ${LAST_VERSION} ]]; then
   git shortlog --no-merges next --not ${LAST_VERSION} | sed -e '/^[ \t]/s#^[ \t]*#* #' | perl -pe 's/:$/:\n/g' >> CHANGELOG.md
   cat $FILENAME_TMPCHANGELOG >> CHANGELOG.md
 else
   git shortlog --no-merges next | sed -e '/^[ \t]/s#^[ \t]*#* #' | perl -pe 's/:$/:\n/g' >> CHANGELOG.md
   cat $FILENAME_TMPCHANGELOG >> CHANGELOG.md
 fi
-echo "Please verify and adjust version information that was appended to CHANGELOG.md file"
+echo "Please verify and adjust version information that was prepended to CHANGELOG.md file"
 echo "Diff looks like this:"
 echo
 echo '###### Diff start ######'
@@ -128,14 +154,14 @@ git commit -m "${REPOSITORY_NAME} ${RELEASE_VERSION}: ${SHORT_SUMMARY}"
 echo
 echo "Checkout and pull master branch"
 git checkout master
-git pull origin master
+git pull $REMOTE master
 
 echo
 echo "Merge release branch to master branch"
 git merge --no-ff --log --no-edit ${RELEASE_BRANCH}
 
 echo
-echo "Create release tag"
+echo "Create release tag ${RELEASE_VERSION}"
 git tag -a ${RELEASE_VERSION} -m "${REPOSITORY_NAME} ${RELEASE_VERSION}: ${SHORT_SUMMARY}"
 
 echo
@@ -149,5 +175,5 @@ git branch -d ${RELEASE_BRANCH}
 
 echo
 echo "Push all changes to remote repository"
-git push origin master next ${RELEASE_VERSION}
+git push $REMOTE master next ${RELEASE_VERSION}
 exit 0
