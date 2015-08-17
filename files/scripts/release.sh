@@ -65,7 +65,7 @@ git fetch $REMOTE --tags
 
 # Some information can be detected
 LAST_VERSION=$( git tag -l | tail -n 1 )
-REPOSITORY_NAME=$( git remote show -n origin | grep Fetch | sed 's#.*/##' | sed 's/\.git//' )
+REPOSITORY_NAME=$( git remote show -n $REMOTE | grep Fetch | sed 's#.*/##' | sed 's/\.git//' )
 RELEASE_BRANCH="release/${RELEASE_VERSION}"
 EXISTING_TAGS=`git tag -l`
 
