@@ -66,7 +66,6 @@ git fetch $REMOTE --tags
 # Some information can be detected
 LAST_VERSION=$( git tag -l | tail -n 1 )
 REPOSITORY_NAME=$( git remote show -n $REMOTE | grep Fetch | sed 's#.*/##' | sed 's/\.git//' )
-RELEASE_BRANCH="release/${RELEASE_VERSION}"
 EXISTING_TAGS=`git tag -l`
 
 # Detect version if not provided by user
@@ -74,6 +73,7 @@ if [[ -z "${RELEASE_VERSION}" ]]; then
   RELEASE_VERSION=$(echo $LAST_VERSION|awk -F . '{print $1 "." $2 + 1 "." $3}')
 fi
 
+RELEASE_BRANCH="release/${RELEASE_VERSION}"
 # Check if there is already a tag named $RELEASE_VERSION
 ## Temporary disabling exit on $? -ne 0 to be able to display error message
 set +e
