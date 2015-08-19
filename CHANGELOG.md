@@ -1,3 +1,17 @@
+# 0.7.0
+
+Alvaro Aleman (9):
+
+* Releasescript: Make all errors fatal
+* Releasescript: Typos
+* Added usage check and message, added exit return codes
+* Releasescript: Fixed formatting in generated CHANGELOG.md output, added diff displaying
+* Releasescript: Added check if a tag named $RELEASE_VERSION already exists
+* Releasescript: Various fixups, improved error handling
+* Releasescript: added execution bit
+* Releasecript: fixed up parameterization
+* Releasecript: fixed version detection
+
 # 0.6.0
 
 Alvaro Aleman (2):
