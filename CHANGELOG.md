@@ -1,3 +1,9 @@
+# 0.8.0
+
+Mark Kusch (1):
+
+* Use source from list for copying static files (thx to Marc Rohlfs)
+
 # 0.7.0
 
 Alvaro Aleman (9):
