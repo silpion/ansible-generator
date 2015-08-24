@@ -38,7 +38,7 @@
       local_action: copy
         mode=0600
         force=false
-        src=files/CHANGELOG.md
+        src=files/{{ item }}
         dest={{ role_path }}/{{ role_prefix }}-{{ role_name }}/{{ item }}
 
     - name: Install directories
