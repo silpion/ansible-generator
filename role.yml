@@ -73,6 +73,7 @@
       with_items:
         - README.md
         - tests/playbook.yml
+        - vars/main.yml
       when: not update
       local_action: template
         mode=0600
