@@ -13,7 +13,7 @@
         that:
           - role_name != ""
           - role_path != ""
-          - role_prefix in ['ansible', 'galaxy', 'silpion']
+          - role_prefix in ['ansible', 'galaxy', 'silpion', 'infra']
 
     - name: Set role_name_nodash
       set_fact:
