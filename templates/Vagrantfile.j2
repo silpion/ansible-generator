@@ -28,6 +28,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         'vagrant' => ['ansible{{ role_name_nodash }}test']
       }
       ansible.limit = 'vagrant'
+      ansible.raw_arguments = [
+        '--diff'
+      ]
+      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
+        ansible.raw_arguments << '--check'
+      end
 
       ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
         ansible.inventory_path = '.vagrant/provisioners/ansible/inventory/'
