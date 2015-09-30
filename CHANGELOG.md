@@ -1,3 +1,18 @@
+# 0.9.0
+
+Alvaro Aleman (1):
+
+* Add infra as allowed prefix
+
+Mark Kusch (6):
+
+* Add role\_version variable to default vars/main.yml
+* Fix missing bracket in jinja method call
+* Always run ansible with --diff in Vagrant
+* Always run ansible with --diff in docker
+* Add --check to ansible.raw\_arguments if configured in environment
+* Allow to deconfigure git
+
 # 0.8.0
 
 Mark Kusch (1):
