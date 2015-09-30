@@ -7,6 +7,7 @@
     - role_path: ""
     - role_prefix: 'ansible'
     - update: false
+    - git: true
   tasks:
     - name: Verify user input for required variables
       assert:
@@ -107,6 +108,7 @@
         dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
 
     - name: git init...
+      when: git
       register: generater_git_init
       local_action: command git init
         chdir={{ role_path }}/{{ role_prefix}}-{{ role_name }}
