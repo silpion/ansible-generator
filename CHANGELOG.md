@@ -1,3 +1,9 @@
+# 0.9.1
+
+
+* Fix releasescript to correctly order generated changelog
+
+Alvaro Aleman (1):
 # 0.9.0
 
 Alvaro Aleman (1):
