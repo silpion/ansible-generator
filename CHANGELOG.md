@@ -1,3 +1,9 @@
+# 0.9.2
+
+
+* Disable host key checking for role in ansible.cfg
+
+Alvaro Aleman (1):
 # 0.9.1
 
 
