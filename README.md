@@ -19,7 +19,8 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 * ``role_name``: Name of the role without prefix (string, default: ``<empty>``, **mandatory**)
 * ``role_path``: Base path of the role fed to *--init-path* from *ansible-galaxy init* (string, default: ``<empty>``, **mandatory**)
 * ``role_prefix``: Directory name prefix for the role (string, choices ['ansible', 'galaxy', 'silpion', 'infra'], default: ``ansible``)
-* ``update``: Wether to update the TDD functionality for an existing role (boolean, default: ``false``)
+* ``update``: Whether to update the TDD functionality for an existing role (boolean, default: ``false``)
+* ``git``: Whether to manage the created role with Git (boolean, default: ``true``)
 
 ### ansible-playbook
 
