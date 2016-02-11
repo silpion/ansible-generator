@@ -1,0 +1,45 @@
+---
+project_dirs:
+  - dest: .
+  - dest: files
+  - dest: roles
+  - dest: inventory
+  - dest: inventory/group_vars
+  - dest: inventory/group_vars/all
+  - dest: inventory/group_vars/vagrant
+  - dest: inventory/hosts_vars
+  - dest: templates
+  - dest: vars
+
+project_files:
+  - dest: .gitignore
+    src: files/.gitignore
+  - dest: ansible.cfg
+    src: files/ansible.cfg.project
+  - dest: requirements.yml
+    content: "---\n"
+  - dest: VERSION
+    content: "0.0.1\n"
+  - dest: README.md
+    template: README.md.project.j2
+  - dest: CHANGELOG.md
+    src: files/CHANGELOG.md
+  - dest: Vagrantfile
+    template: Vagrantfile.project.j2
+  - dest: playbook.yml
+  - dest: files/.gitkeep
+    empty: true
+  - dest: roles/.gitkeep
+    empty: true
+  - dest: templates/.gitkeep
+    empty: true
+  - dest: inventory/hosts
+    empty: true
+  - dest: inventory/hosts_vars/.gitkeep
+    empty: true
+  - dest: inventory/group_vars/all/general.yml
+    template: inventory/group_vars/all/general.yml
+  - dest: inventory/group_vars/vagrant/secrets.yml
+    content: "---\n# write all secrets here"
+  - dest: inventory/group_vars/vagrant/general.yml
+    template: inventory/group_vars/vagrant/general.yml

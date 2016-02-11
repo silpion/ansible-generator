@@ -1,0 +1,98 @@
+# vim: set ft=ruby ts=2 sw=2 et:
+# -*- mode: ruby -*-
+#
+# This is only an example for possible options within vagrant
+
+
+VAGRANT_API_VERSION = '2'
+Vagrant.configure(VAGRANT_API_VERSION) do |config|
+
+  # configure base-image
+  config.vm.box = ENV['VAGRANT_BOXNAME'] || 'ubuntu/trusty64'
+  # disable update check
+  config.vm.box_check_update = false
+
+  # configure your vm's add element to array if you need more than one vm
+  vms = {
+    :{{ project_name_nodash }} => {
+      'ip' => '{{ project_ip|default("")}}',
+      'port' => '{{ project_port|default("")}}',
+      'name' => '{{ project_name_nodash }}',
+      'cpu' => '1',
+      'mem' => '1024',
+      'synced' => '1',
+    }
+  }
+
+  vms.each do |k, vm|
+    config.vm.define :"#{k}" do |d|
+
+      # set hostname
+      d.vm.hostname = "#{vm['name']}"
+
+      # if no ip given configure briged network else private
+      if "#{vm['ip']}" != ''
+        d.vm.network :private_network, :ip => "#{vm['ip']}"
+      else
+        if "#{vm['port']}" != ''
+          d.vm.network :forwarded_port, :host => "#{vm['port']}", :guest => 80
+        else
+          d.vm.network :public_network, :use_dhcp_assigned_default_route => true
+          d.ssh.forward_agent = true
+        end
+      end
+
+      # manage synced folders
+      if "#{vm['synced']}" == '1'
+        d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
+      else
+        d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
+      end
+
+      # for windows users istall this vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
+      provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+
+      # run ansible provisioning
+      d.vm.provision provisioner do |ansible|
+        ansible.playbook = 'playbook.yml'
+        ansible.tags = ENV['ANSIBLE_TAGS']
+        ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
+        ansible.verbose = ENV['ANSIBLE_VERBOSE']
+        ansible.ask_sudo_pass = ENV['ANSIBLE_SUDO_PASS']
+        ansible.raw_arguments = {}
+        ansible.groups = {
+          'vagrant' => ["#{k}"]
+        }
+        ansible.limit = 'vagrant'
+        if ENV['ANSIBLE_DIFF'] == '1'
+          ansible.raw_arguments << '--diff'
+        end
+        if ENV['ANSIBLE_CHECKMODE'] == '1'
+          ansible.raw_arguments << '--check'
+        end
+        if ENV['ANSIBLE_ASK_VAULT'] == '1'
+          ansible.raw_arguments << '--ask-vault-pass'
+        end
+
+        # configure dynamic vagrant  inventory
+        ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
+          ansible.inventory_path = '.vagrant/provisioners/ansible/inventory/'
+        end
+
+      end
+
+      d.vm.provider :virtualbox do |v|
+        v.customize 'pre-boot', ['modifyvm', :id, '--nictype1', 'virtio']
+        v.customize [ 'modifyvm', :id, '--name', "#{k}", '--memory', "#{vm['mem']}", '--cpus', "#{vm['cpu']}"]
+        if "#{vm['synced']}" == '1'
+          v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
+        end
+      end
+
+      d.vm.provider :libvirt do |lv|
+        lv.memory = "#{vm['mem']}"
+        lv.cpus = "#{vm['cpu']}"
+      end
+    end
+  end
+end

@@ -1,0 +1,9 @@
+# see options: http://docs.ansible.com/ansible/intro_configuration.html
+
+[defaults]
+roles_path = roles/
+nventory = inventory/
+nocows = 0
+cow_selection = random
+retry_files_enabled = 0
+host_key_checking = 0

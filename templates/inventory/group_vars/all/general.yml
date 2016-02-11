@@ -1,0 +1,5 @@
+---
+# write general server configuration here.
+
+# get server ip
+{{ project_name }}_server_ip: "{{'{{'}} ansible_eth1.ipv4.address {{'}}'}}"
