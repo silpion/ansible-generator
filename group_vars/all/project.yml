@@ -1,13 +1,11 @@
 ---
 project_dirs:
-  - dest: .
   - dest: files
   - dest: roles
-  - dest: inventory
-  - dest: inventory/group_vars
-  - dest: inventory/group_vars/all
-  - dest: inventory/group_vars/vagrant
-  - dest: inventory/hosts_vars
+  - dest: group_vars
+  - dest: group_vars/all
+  - dest: group_vars/vagrant
+  - dest: hosts_vars
   - dest: templates
   - dest: vars
 
@@ -33,13 +31,13 @@ project_files:
     empty: true
   - dest: templates/.gitkeep
     empty: true
-  - dest: inventory/hosts
+  - dest: hosts
     empty: true
-  - dest: inventory/hosts_vars/.gitkeep
+  - dest: hosts_vars/.gitkeep
     empty: true
-  - dest: inventory/group_vars/all/general.yml
-    template: inventory/group_vars/all/general.yml
-  - dest: inventory/group_vars/vagrant/secrets.yml
+  - dest: group_vars/all/general.yml
+    template: group_vars/all/general.yml
+  - dest: group_vars/vagrant/secrets.yml
     content: "---\n# write all secrets here"
-  - dest: inventory/group_vars/vagrant/general.yml
-    template: inventory/group_vars/vagrant/general.yml
+  - dest: group_vars/vagrant/general.yml
+    template: group_vars/vagrant/general.yml
