@@ -14,7 +14,7 @@
 
     - name: Set project_name_nodash
       set_fact:
-        project_name_nodash: "{{ project_name | replace('-','') }}"
+        project_name_nodash: "{{ project_name|replace('-', '') }}"
 
     - name: Create Directories
       tags:
@@ -23,7 +23,7 @@
       local_action: file
       args:
         state: directory
-        path: "{{ project_path }}/{{ project_name}}/{{ item.dest }}"
+        path: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
 
 
     - name: Copy templated Files
@@ -34,7 +34,7 @@
         - "{{ project_files|selectattr('content', 'defined')|list }}"
       local_action: copy
       args:
-        dest: "{{ project_path }}/{{ project_name}}/{{ item.dest }}"
+        dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         src: "{{ item.src|default(omit) }}"
         content: "{{ item.content|default(omit) }}"
         force: "{{ item.force|default(false) }}"
@@ -47,7 +47,7 @@
       local_action: template
       args:
         src: "templates/{{ item.template }}"
-        dest: "{{ project_path }}/{{ project_name}}/{{ item.dest }}"
+        dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         force: "{{ item.force|default(false) }}"
 
     - name: Create empty Files
@@ -58,4 +58,4 @@
       local_action: file
       args:
         state: touch
-        dest: "{{ project_path }}/{{ project_name}}/{{ item.dest }}"
+        dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
