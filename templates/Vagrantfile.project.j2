@@ -60,6 +60,8 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         ansible.verbose = ENV['ANSIBLE_VERBOSE']
         ansible.ask_sudo_pass = ENV['ANSIBLE_SUDO_PASS']
         ansible.raw_arguments = {}
+        ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
+        ansible.galaxy_role_file = 'requirements.yml'
         ansible.groups = {
           'vagrant' => ["#{k}"]
         }
