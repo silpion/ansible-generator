@@ -17,6 +17,12 @@ project_files:
     force: true
   - dest: requirements.yml
     content: "---\n"
+  - dest: bootstrap.yml
+    content: "---\n"
+  - dest: infrastructure.yml
+    content: "---\n"
+  - dest: deployment.yml
+    content: "---\n"
   - dest: VERSION
     content: "0.0.1\n"
   - dest: README.md
