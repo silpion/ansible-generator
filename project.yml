@@ -19,7 +19,7 @@
     - name: Create Directories
       tags:
         - project
-      with_items: project_dirs
+      with_items: "{{ project_dirs }}"
       local_action: file
       args:
         state: directory
