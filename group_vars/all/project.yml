@@ -36,8 +36,8 @@ project_files:
   - dest: hosts_vars/.gitkeep
     empty: true
   - dest: group_vars/all/general.yml
-    template: group_vars/all/general.yml
+    template: inventory/group_vars/all/general.yml.j2
   - dest: group_vars/vagrant/secrets.yml
     content: "---\n# write all secrets here"
   - dest: group_vars/vagrant/general.yml
-    template: group_vars/vagrant/general.yml
+    template: inventory/group_vars/vagrant/general.yml.j2
