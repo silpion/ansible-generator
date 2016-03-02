@@ -1,7 +1,6 @@
 ---
 project_dirs:
   - dest: files
-  - dest: roles
   - dest: group_vars
   - dest: group_vars/all
   - dest: group_vars/vagrant
@@ -12,8 +11,10 @@ project_dirs:
 project_files:
   - dest: .gitignore
     src: files/project/.gitignore
+    force: true
   - dest: ansible.cfg
     src: files/project/ansible.cfg
+    force: true
   - dest: requirements.yml
     content: "---\n"
   - dest: VERSION
@@ -26,14 +27,15 @@ project_files:
     template: project/Vagrantfile.j2
   - dest: playbook.yml
   - dest: files/.gitkeep
-    empty: true
-  - dest: roles/.gitkeep
+    force: true
     empty: true
   - dest: templates/.gitkeep
+    force: true
     empty: true
   - dest: hosts
     empty: true
   - dest: host_vars/.gitkeep
+    force: true
     empty: true
   - dest: group_vars/all/general.yml
     template: project/group_vars/all/general.yml.j2

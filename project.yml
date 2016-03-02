@@ -47,9 +47,10 @@
     - name: Create empty Files
       tags: project
       with_items: "{{ project_files|selectattr('empty', 'defined')|list }}"
-      file:
-        state: touch
+      copy:
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
+        content: ""
+        force: "{{ item.force|default(false) }}"
 
     - name: echo {{ project_path }}/{{ project_name }}
       tags: project
