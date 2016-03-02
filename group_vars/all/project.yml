@@ -5,7 +5,7 @@ project_dirs:
   - dest: group_vars
   - dest: group_vars/all
   - dest: group_vars/vagrant
-  - dest: hosts_vars
+  - dest: host_vars
   - dest: templates
   - dest: vars
 
@@ -33,7 +33,7 @@ project_files:
     empty: true
   - dest: hosts
     empty: true
-  - dest: hosts_vars/.gitkeep
+  - dest: host_vars/.gitkeep
     empty: true
   - dest: group_vars/all/general.yml
     template: inventory/group_vars/all/general.yml.j2
