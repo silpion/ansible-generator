@@ -1,0 +1,13 @@
+---
+{% if not project_no_ssh_pipelining %}
+- hosts: all
+  gather_facts: false
+  tasks:
+    - lineinfile:
+        dest: /etc/sudoers
+        regexp: 'Defaults[ \t]+requiretty'
+        state: absent
+      become: true
+      vars:
+        ansible_ssh_pipelining: False
+{% endif %}
