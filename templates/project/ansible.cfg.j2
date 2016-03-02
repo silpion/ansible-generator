@@ -6,3 +6,8 @@ nocows = 0
 cow_selection = random
 retry_files_enabled = 0
 host_key_checking = 0
+
+{% if not project_no_ssh_pipelining %}
+[ssh]
+pipelining = 1
+{% endif %}
