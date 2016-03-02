@@ -7,6 +7,7 @@
     - project_path: ""
   tasks:
     - name: Verify user input for required variables
+      tags: project
       assert:
         that:
           - project_name != ""
@@ -17,45 +18,40 @@
         project_name_nodash: "{{ project_name|replace('-', '') }}"
 
     - name: Create Directories
-      tags:
-        - project
+      tags: project
       with_items: "{{ project_dirs }}"
-      local_action: file
-      args:
+      file:
         state: directory
         path: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
 
-
     - name: Copy templated Files
-      tags:
-        - project
+      tags: project
       with_items:
         - "{{ project_files|selectattr('src', 'defined')|list }}"
         - "{{ project_files|selectattr('content', 'defined')|list }}"
-      local_action: copy
-      args:
+      copy:
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         src: "{{ item.src|default(omit) }}"
         content: "{{ item.content|default(omit) }}"
         force: "{{ item.force|default(false) }}"
 
     - name: Create Templated Files
-      tags:
-        - project
+      tags: project
       with_items:
         - "{{ project_files|selectattr('template', 'defined')|list }}"
-      local_action: template
-      args:
+      template:
         src: "templates/{{ item.template }}"
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         force: "{{ item.force|default(false) }}"
 
     - name: Create empty Files
-      tags:
-        - project
-      with_items:
-        - "{{ project_files|selectattr('empty', 'defined')|list }}"
-      local_action: file
-      args:
+      tags: project
+      with_items: "{{ project_files|selectattr('empty', 'defined')|list }}"
+      file:
         state: touch
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
+
+    - name: echo {{ project_path }}/{{ project_name }}
+      tags: project
+      debug:
+        msg: "Find the Ansible project at {{ project_path }}/{{ project_name }}"

@@ -11,19 +11,19 @@ project_dirs:
 
 project_files:
   - dest: .gitignore
-    src: files/.gitignore
+    src: files/project/.gitignore
   - dest: ansible.cfg
-    src: files/ansible.cfg.project
+    src: files/project/ansible.cfg
   - dest: requirements.yml
     content: "---\n"
   - dest: VERSION
     content: "0.0.1\n"
   - dest: README.md
-    template: README.md.project.j2
+    template: project/README.md.j2
   - dest: CHANGELOG.md
-    src: files/CHANGELOG.md
+    src: files/project/CHANGELOG.md
   - dest: Vagrantfile
-    template: Vagrantfile.project.j2
+    template: project/Vagrantfile.j2
   - dest: playbook.yml
   - dest: files/.gitkeep
     empty: true
@@ -36,8 +36,8 @@ project_files:
   - dest: host_vars/.gitkeep
     empty: true
   - dest: group_vars/all/general.yml
-    template: inventory/group_vars/all/general.yml.j2
+    template: project/group_vars/all/general.yml.j2
   - dest: group_vars/vagrant/secrets.yml
     content: "---\n# write all secrets here"
   - dest: group_vars/vagrant/general.yml
-    template: inventory/group_vars/vagrant/general.yml.j2
+    template: project/group_vars/vagrant/general.yml.j2
