@@ -1,7 +1,5 @@
 ---
-- hosts: all
-  tasks:
-    - include: bootstrap.yml
-    - include: infrastructure.yml
-    - include: deployment.yml
+- include: bootstrap.yml
+- include: infrastructure.yml
+- include: deployment.yml
 

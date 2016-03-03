@@ -1,5 +1,8 @@
 ---
 - src: git+ssh://git@git.silpion.de:2222/isar/ansible-util.git
   name: silpion.util
-  version: 'feature/DOP-195-prepare-sudoers-for-ansible-pipelining'
+  version: 'cde2b260d8d80'
 
+- src: git+ssh://git@git.silpion.de:2222/isar/ansible-machineid.git
+  name: silpion.machineid
+  version: '2.0.0'

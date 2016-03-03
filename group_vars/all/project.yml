@@ -24,9 +24,9 @@ project_files:
   - dest: bootstrap.yml
     src: files/project/bootstrap.yml
   - dest: infrastructure.yml
-    content: "---\n"
+    src: files/project/infrastructure.yml
   - dest: deployment.yml
-    content: "---\n"
+    src: files/project/deployment.yml
   - dest: VERSION
     content: "0.0.1\n"
   - dest: README.md
