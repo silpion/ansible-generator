@@ -13,6 +13,20 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   config.vm.box_check_update = false
 
   # configure your vm's add element to array if you need more than one vm
+  #
+  #  vms = {
+  #    :{{ project_name_nodash }}db => {
+  #      'name' => '{{ project_name_nodash }}db',
+  #      'cpu' => '1',
+  #      'mem' => '256',
+  #    },
+  #    :{{ project_name_nodash }}web => {
+  #      'name' => '{{ project_name_nodash }}web',
+  #      'cpu' => '1',
+  #      'mem' => '256',
+  #    }
+  #  }
+
   vms = {
     :{{ project_name_nodash }} => {
       'ip' => '{{ project_ip|default("")}}',
@@ -43,10 +57,17 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       end
 
       # manage synced folders
-      if "#{vm['synced']}" == '1'
-        d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
-      else
+      # CentOS Box uses  /home/vagrant/sync
+      if "#{vm['synced']}" != '1'
+        # default disable synced folder
         d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
+      else
+        # put your syncted folder configuration here. see: https://www.vagrantup.com/docs/synced-folders
+        # By default, Vagrant will share your project directory (the directory with the Vagrantfile) to /vagrant. (CentOS /home/vagrant/sync)
+        #
+        # Example: if you want to sync your code with special permissions like web user should be able to read it you can
+        # use optional Variables like :owner, :group, :mount_options
+        # d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
       end
 
       # for windows users istall this vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
@@ -86,9 +107,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       d.vm.provider :virtualbox do |v|
         v.customize 'pre-boot', ['modifyvm', :id, '--nictype1', 'virtio']
         v.customize [ 'modifyvm', :id, '--name', "#{k}", '--memory', "#{vm['mem']}", '--cpus', "#{vm['cpu']}"]
-        if "#{vm['synced']}" == '1'
-          v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
-        end
+
+        # fix for Virtual-Box and synced_folder: http://www.ahtik.com/blog/fixing-your-virtualbox-shared-folder-symlink-error/
+        #
+        # if "#{vm['synced']}" == '1'
+        #    v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
+        # end
       end
 
       d.vm.provider :libvirt do |lv|
