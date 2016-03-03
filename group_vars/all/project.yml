@@ -19,6 +19,8 @@ project_files:
     template: project/ansible.cfg.j2
   - dest: requirements.yml
     src: files/project/requirements.yml
+  - dest: playbook.yml
+    src: files/project/playbook.yml
   - dest: bootstrap.yml
     src: files/project/bootstrap.yml
   - dest: infrastructure.yml
