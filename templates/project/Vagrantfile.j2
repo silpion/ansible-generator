@@ -94,7 +94,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
         # add additional raw_arguments
         # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
-        ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_ARGS']) if ENV['ANSIBLE_RAW_ARGUMENTS']
+        ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_RAW_ARGUMENTS']) if ENV['ANSIBLE_RAW_ARGUMENTS']
 
         # configure dynamic vagrant  inventory
         ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
