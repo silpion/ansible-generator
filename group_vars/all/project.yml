@@ -3,6 +3,9 @@ project_dirs:
   - dest: files
   - dest: group_vars
   - dest: group_vars/all
+  - dest: group_vars/prod
+  - dest: group_vars/test
+  - dest: group_vars/stage
   - dest: group_vars/vagrant
   - dest: host_vars
   - dest: templates
@@ -13,9 +16,16 @@ project_files:
     src: files/project/.gitignore
     force: true
   - dest: ansible.cfg
-    src: files/project/ansible.cfg
-    force: true
+    template: project/ansible.cfg.j2
   - dest: requirements.yml
+    src: files/project/requirements.yml
+  - dest: playbook.yml
+    src: files/project/playbook.yml
+  - dest: bootstrap.yml
+    src: files/project/bootstrap.yml
+  - dest: infrastructure.yml
+    content: "---\n"
+  - dest: deployment.yml
     content: "---\n"
   - dest: VERSION
     content: "0.0.1\n"
@@ -39,7 +49,15 @@ project_files:
     empty: true
   - dest: group_vars/all/general.yml
     template: project/group_vars/all/general.yml.j2
+  - dest: group_vars/prod/README.md
+    src: files/project/prod/README.md
+  - dest: group_vars/test/README.md
+    src: files/project/test/README.md
+  - dest: group_vars/stage/README.md
+    src: files/project/stage/README.md
   - dest: group_vars/vagrant/secrets.yml
     content: "---\n# write all secrets here"
   - dest: group_vars/vagrant/general.yml
     template: project/group_vars/vagrant/general.yml.j2
+
+project_no_ssh_pipelining: False
