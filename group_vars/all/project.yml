@@ -18,9 +18,9 @@ project_files:
   - dest: ansible.cfg
     template: project/ansible.cfg.j2
   - dest: requirements.yml
-    file: files/project/requirements.yml
+    src: files/project/requirements.yml
   - dest: bootstrap.yml
-    file: files/project/bootstrap.yml
+    src: files/project/bootstrap.yml
   - dest: infrastructure.yml
     content: "---\n"
   - dest: deployment.yml
