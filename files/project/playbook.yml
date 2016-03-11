@@ -1,5 +1,5 @@
 ---
-- include: bootstrap.yml
-- include: infrastructure.yml
-- include: deployment.yml
-
+- hosts: all
+  roles:
+    - silpion.util
+    - silpion.machineid
