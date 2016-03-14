@@ -21,10 +21,6 @@ project_files:
     src: files/project/requirements.yml
   - dest: playbook.yml
     src: files/project/playbook.yml
-  - dest: bootstrap.yml
-    src: files/project/bootstrap.yml
-  - dest: infrastructure.yml
-    src: files/project/infrastructure.yml
   - dest: deployment.yml
     src: files/project/deployment.yml
   - dest: VERSION
