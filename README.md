@@ -42,8 +42,8 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 ### ansible-playbook
 
     ansible-playbook \
-      -e role_name=testproject \
-      -e role_path=$HOME/work/git/projects \
+      -e project_name=testproject \
+      -e project_path=$HOME/work/git/projects \
       project.yml
 
 
