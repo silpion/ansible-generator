@@ -36,7 +36,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     :{{ project_name_nodash }} => {
       'ip' => '{{ project_ip|default("")}}',
       'port' => '{{ project_port|default("")}}',
-      'name' => '{{ project_name_nodash }}_1',
+      'name' => '{{ project_name_nodash }}',
       'cpu' => '1',
       'mem' => '1024',
       'synced' => '1',
