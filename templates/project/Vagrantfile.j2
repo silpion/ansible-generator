@@ -15,13 +15,18 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   # configure your vm's add element to array if you need more than one vm
   #
   #  vms = {
-  #    :{{ project_name_nodash }}db => {
-  #      'name' => '{{ project_name_nodash }}db',
+  #    :{{ project_name_nodash }}_db_01 => {
+  #      'name' => '{{ project_name_nodash }}-db-01',
   #      'cpu' => '1',
   #      'mem' => '256',
   #    },
-  #    :{{ project_name_nodash }}web => {
-  #      'name' => '{{ project_name_nodash }}web',
+  #    :{{ project_name_nodash }}_db_02 => {
+  #      'name' => '{{ project_name_nodash }}-db-02',
+  #      'cpu' => '1',
+  #      'mem' => '256',
+  #    }
+  #    :{{ project_name_nodash }}_web_01 => {
+  #      'name' => '{{ project_name_nodash }}-web-01
   #      'cpu' => '1',
   #      'mem' => '256',
   #    }
@@ -37,6 +42,20 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       'synced' => '1',
     }
   }
+
+  # configure your groups
+  # groups = {
+  #   'db' => [
+  #     "{{ project_name_nodash }}_db_01",
+  #     "{{ project_name_nodash }}_db_02",
+  #   ],
+  #   'web' => [
+  #     "{{ project_name_nodash }}_web_01"
+  #   ]
+  # }
+  groups = {}
+
+  machine_count = 0
 
   vms.each do |k, vm|
     config.vm.define :"#{k}" do |d|
@@ -70,36 +89,38 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         # d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
       end
 
-      # for windows users istall this vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
-      provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+      machine_count += 1
 
-      # run ansible provisioning
-      d.vm.provision provisioner do |ansible|
-        ansible.playbook = 'playbook.yml'
-        ansible.tags = ENV['ANSIBLE_TAGS']
-        ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
-        ansible.verbose = ENV['ANSIBLE_VERBOSE']
-        ansible.ask_sudo_pass = ENV['ANSIBLE_SUDO_PASS']
-        ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
-        ansible.galaxy_role_file = 'requirements.yml'
-        ansible.groups = {
-          'vagrant' => ["#{k}"]
-        }
-        ansible.limit = 'vagrant'
+      if machine_count == vms.count()
+        # for windows users istall this vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
+        provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
 
-        if "#{vm['ip']}" != ''
-              ansible.extra_vars = { "{{ project_name_nodash }}_ip_address" => "#{vm['ip']}",}
+        # run ansible provisioning
+        d.vm.provision provisioner do |ansible|
+          ansible.playbook = 'playbook.yml'
+          ansible.tags = ENV['ANSIBLE_TAGS']
+          ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
+          ansible.verbose = ENV['ANSIBLE_VERBOSE']
+          ansible.ask_sudo_pass = ENV['ANSIBLE_SUDO_PASS']
+          ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
+          ansible.galaxy_role_file = 'requirements.yml'
+          ansible.groups = groups
+          ansible.limit = 'all'
+          ansible.limit = ENV['ANSIBLE_LIMIT'] if ENV['ANSIBLE_LIMIT']
+
+          if "#{vm['ip']}" != ''
+                ansible.extra_vars = { "{{ project_name_nodash }}_ip_address" => "#{vm['ip']}",}
+          end
+
+          # add additional raw_arguments
+          # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
+          ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_RAW_ARGUMENTS']) if ENV['ANSIBLE_RAW_ARGUMENTS']
+
+          # configure dynamic vagrant  inventory
+          ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
+            ansible.inventory_path = '.vagrant/provisioners/ansible/inventory/'
+          end
         end
-
-        # add additional raw_arguments
-        # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
-        ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_RAW_ARGUMENTS']) if ENV['ANSIBLE_RAW_ARGUMENTS']
-
-        # configure dynamic vagrant  inventory
-        ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
-          ansible.inventory_path = '.vagrant/provisioners/ansible/inventory/'
-        end
-
       end
 
       d.vm.provider :virtualbox do |v|
