@@ -114,8 +114,8 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       end
 
       d.vm.provider :libvirt do |lv|
-        lv.memory = "#{vm['mem']}"
-        lv.cpus = "#{vm['cpu']}"
+        lv.memory = vm['mem'].to_i
+        lv.cpus = vm['cpu'].to_i
       end
     end
   end
