@@ -45,12 +45,12 @@ project_files:
     empty: true
   - dest: group_vars/all/general.yml
     template: project/group_vars/all/general.yml.j2
-  - dest: group_vars/prod/README.md
-    src: files/project/prod/README.md
-  - dest: group_vars/test/README.md
-    src: files/project/test/README.md
-  - dest: group_vars/stage/README.md
-    src: files/project/stage/README.md
+  - dest: group_vars/prod/general.yml
+    src: files/project/prod/general.yml
+  - dest: group_vars/test/general.yml
+    src: files/project/test/general.yml
+  - dest: group_vars/stage/general.yml
+    src: files/project/stage/general.yml
   - dest: group_vars/vagrant/secrets.yml
     content: "---\n# write all secrets here"
   - dest: group_vars/vagrant/general.yml
