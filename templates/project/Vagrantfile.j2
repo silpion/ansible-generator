@@ -53,7 +53,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   #     "{{ project_name_nodash }}_web_01"
   #   ]
   # }
-  groups = {}
+  groups = {
+    'vagrant' => ["#{vm['name']}"]
+  }
 
   machine_count = 0
 
