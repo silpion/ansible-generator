@@ -2,4 +2,4 @@
 # write general server configuration here.
 
 # get server ip
-{{ project_name }}_server_ips: "{{'{{ '+project_name_nodash+'_ip_address|default(ansible_default_ipv4.address) }}'}}"
+{{ project_name_nodash }}_server_ip: "{{'{{ '+project_name_nodash+'_ip_address|default(ansible_default_ipv4.address) }}'}}"
