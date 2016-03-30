@@ -54,7 +54,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   #   ]
   # }
   groups = {
-    'vagrant' => ["#{vm['name']}"]
+    'vagrant' => ["{{ project_name_nodash }}"]
   }
 
   machine_count = 0
