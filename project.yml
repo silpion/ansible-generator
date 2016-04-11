@@ -15,7 +15,7 @@
 
     - name: Set project_name_nodash
       set_fact:
-        project_name_nodash: "{{ project_name|replace('-', '') }}"
+        project_name_nodash: "{{ project_name|regex_replace('[^a-zA-Z0-9]', '') }}"
 
     - name: Create Directories
       tags: project
