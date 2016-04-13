@@ -15,62 +15,61 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   # configure your vm's add element to array if you need more than one vm
   #
   #  vms = {
-  #    :{{ project_name_nodash }}_db_01 => {
+  #    '{{ project_name_nodash }}1 => {
   #      'name' => '{{ project_name_nodash }}-db-01',
-  #      'cpu' => '1',
   #      'mem' => '256',
+  #      'groups' => ['vagrant','db']
   #    },
-  #    :{{ project_name_nodash }}_db_02 => {
+  #    '{{ project_name_nodash }}2 => {
   #      'name' => '{{ project_name_nodash }}-db-02',
-  #      'cpu' => '1',
+  #      'cpu' => '2',
   #      'mem' => '256',
+  #      'groups' => ['vagrant','db']
   #    }
-  #    :{{ project_name_nodash }}_web_01 => {
+  #    '{{ project_name_nodash }}3 => {
   #      'name' => '{{ project_name_nodash }}-web-01
-  #      'cpu' => '1',
-  #      'mem' => '256',
+  #      'port' => {'8080' => '80'}       # {'host' => 'guest'}
+  #      'groups' => ['vagrant','web']
+  #      'synced' => true
   #    }
   #  }
 
   vms = {
-    :{{ project_name_nodash }} => {
+    '{{ project_name_nodash }}1' => {
       'ip' => '{{ project_ip|default("")}}',
       'port' => '{{ project_port|default("")}}',
       'name' => '{{ project_name_nodash }}',
-      'cpu' => '1',
-      'mem' => '1024',
-      'synced' => '1',
+      'groups' => ['vagrant']
     }
   }
 
-  # configure your groups
-  # groups = {
-  #   'db' => [
-  #     "{{ project_name_nodash }}_db_01",
-  #     "{{ project_name_nodash }}_db_02",
-  #   ],
-  #   'web' => [
-  #     "{{ project_name_nodash }}_web_01"
-  #   ]
-  # }
-  groups = {
-    'vagrant' => ["{{ project_name_nodash }}"]
-  }
+  groups = {}
+  host_vars = {}
 
-  machine_count = 0
+  (1..vms.count()).each do |machine_id|
+    key = "{{ project_name_nodash }}#{machine_id}"
 
-  vms.each do |k, vm|
-    config.vm.define :"#{k}" do |d|
+    # definde some defaults
+    synced = vms[key]['synced'] || false
+    port = vms[key]['port'] || {}
+    ip = vms[key]['ip'] || ''
+    cpu = vms[key]['cpu'] || 1
+    mem = vms[key]['mem'] || 1024
+
+
+    config.vm.define :"#{vms[key]['name']}" do |d|
 
       # set hostname
-      d.vm.hostname = "#{vm['name']}"
+      d.vm.hostname = "#{vms[key]['name']}"
 
       # if no ip given configure briged network else private
-      if "#{vm['ip']}" != ''
-        d.vm.network :private_network, :ip => "#{vm['ip']}"
+      if ip != ''
+        d.vm.network :private_network, :ip => "#{ip}"
       else
-        if "#{vm['port']}" != ''
-          d.vm.network :forwarded_port, :host => "#{vm['port']}", :guest => 80
+        if port.count() > 0
+          port.each do |h, g|
+            d.vm.network :forwarded_port, :host => "#{h}", :guest => "#{g}"
+          end
         else
           d.vm.network :public_network, :use_dhcp_assigned_default_route => true
           d.ssh.forward_agent = true
@@ -79,7 +78,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
       # manage synced folders
       # CentOS Box uses  /home/vagrant/sync
-      if "#{vm['synced']}" != '1'
+      if synced == false
         # default disable synced folder
         d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
       else
@@ -91,9 +90,23 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         # d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
       end
 
-      machine_count += 1
+      # manage ansible groups
+      if vms[key]['groups'].count() > 0
+        vms[key]['groups'].each do |group|
+          if groups.include?(group) == false
+            groups[group] = []
+          end
+          groups[group].push(vms[key]['name'])
+        end
+      end
 
-      if machine_count == vms.count()
+      # add ipadress as host variable
+      if ip != ''
+        host_vars[vms[key]['name']] = { "slpnhek_ip_address" => "#{ip}"}
+      end
+
+
+      if machine_id == vms.count()
         # for windows users istall this vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
         provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
 
@@ -107,12 +120,8 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
           ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
           ansible.galaxy_role_file = 'requirements.yml'
           ansible.groups = groups
-          ansible.limit = 'all'
-          ansible.limit = ENV['ANSIBLE_LIMIT'] if ENV['ANSIBLE_LIMIT']
-
-          if "#{vm['ip']}" != ''
-                ansible.extra_vars = { "{{ project_name_nodash }}_ip_address" => "#{vm['ip']}",}
-          end
+          ansible.limit = ENV['ANSIBLE_LIMIT'] || 'vagrant'
+          ansible.host_vars = host_vars
 
           # add additional raw_arguments
           # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
@@ -127,18 +136,18 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
       d.vm.provider :virtualbox do |v|
         v.customize 'pre-boot', ['modifyvm', :id, '--nictype1', 'virtio']
-        v.customize [ 'modifyvm', :id, '--name', "#{k}", '--memory', "#{vm['mem']}", '--cpus', "#{vm['cpu']}"]
+        v.customize [ 'modifyvm', :id, '--name', "#{vms[key]['name']}", '--memory', "#{mem}", '--cpus', "#{cpu}"]
 
         # fix for Virtual-Box and synced_folder: http://www.ahtik.com/blog/fixing-your-virtualbox-shared-folder-symlink-error/
         #
-        # if "#{vm['synced']}" == '1'
+        # if synced == true
         #    v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
         # end
       end
 
       d.vm.provider :libvirt do |lv|
-        lv.memory = vm['mem'].to_i
-        lv.cpus = vm['cpu'].to_i
+        lv.memory = mem
+        lv.cpus = cpu
       end
     end
   end
