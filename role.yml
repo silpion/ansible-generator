@@ -20,7 +20,7 @@
     - name: Set role_name_nodash
       tags: role
       set_fact:
-        role_name_nodash: "{{ role_name | replace('-','') }}"
+        role_name_nodash: "{{ role_name|regex_replace('[^a-zA-Z0-9]', '') }}"
 
     - name: Install Ansible role
       tags: role
