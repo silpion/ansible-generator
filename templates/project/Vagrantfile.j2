@@ -1,15 +1,15 @@
 # vim: set ft=ruby ts=2 sw=2 et:
 # -*- mode: ruby -*-
 #
-# This is only an example for possible options within vagrant
-
+# This is an example for possible options within vagrant
 
 VAGRANT_API_VERSION = '2'
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
   # configure base-image
+  #   this might be configured on a per-VM basis as well
   config.vm.box = ENV['VAGRANT_BOXNAME'] || 'ubuntu/trusty64'
-  # disable update check
+  # disable box version update check
   config.vm.box_check_update = false
 
   # configure your vm's add element to array if you need more than one vm
@@ -36,9 +36,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
   vms = {
     '{{ project_name_nodash }}1' => {
-      'ip' => '{{ project_ip|default("")}}',
-      'port' => '{{ project_port|default("")}}',
       'name' => '{{ project_name_nodash }}',
+      'ip' => {{ project_ip|default('nil') }},
+      'ports' => {{ ports|default('{}') }},
       'groups' => ['vagrant']
     }
   }
@@ -49,28 +49,45 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   (1..vms.count()).each do |machine_id|
     key = "{{ project_name_nodash }}#{machine_id}"
 
-    # definde some defaults
+    # defaults configuration
+    #   network configuration
+    #     if `ip' is configured, Vagrant will use a private network based on this ip
+    ip = vms[key]['ip'] || nil
+
+    #     if `ip' is empty string and `ports' is dictionary, NAT based networking
+    #     with port forwarding is used. ports maps HOST_PORT => GUEST_PORT.
+    #
+    #     ports = { HOST_PORT => GUEST_PORT }
+    #     ports = { 8080 => 8080, 27017 => 27017 }
+    ports = vms[key]['ports'] || {}
+
+    # Whether to allow Vagrant to syncronize the project directory from host
+    #   to guest.
     synced = vms[key]['synced'] || false
-    port = vms[key]['port'] || {}
-    ip = vms[key]['ip'] || ''
+
+    # Configure CPU and Memory per VM
     cpu = vms[key]['cpu'] || 1
     mem = vms[key]['mem'] || 1024
 
-
+    # setup/configure VMs
     config.vm.define :"#{vms[key]['name']}" do |d|
 
       # set hostname
-      d.vm.hostname = "#{vms[key]['name']}"
+      d.vm.hostname = vms[key]['name']
 
-      # if no ip given configure briged network else private
-      if ip != ''
-        d.vm.network :private_network, :ip => "#{ip}"
+      # "private network"
+      if not ip.nil?
+        d.vm.network :private_network, :ip => ip
+        # add IP adress as Ansible host var
+        host_vars[vms][key]['name'] = { "{{ project_name_nodash }}_ip_address" => ip }
       else
-        if port.count() > 0
-          port.each do |h, g|
-            d.vm.network :forwarded_port, :host => "#{h}", :guest => "#{g}"
+        # "NAT" network with port forwarding
+        if ports.count() > 0
+          ports.each do |h, g|
+            d.vm.network :forwarded_port, :host => h, :guest => g
           end
         else
+          # "public" (bridged) network - USE WITH CARE!
           d.vm.network :public_network, :use_dhcp_assigned_default_route => true
           d.ssh.forward_agent = true
         end
@@ -78,19 +95,23 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
       # manage synced folders
       # CentOS Box uses  /home/vagrant/sync
-      if synced == false
-        # default disable synced folder
+      if not synced
+        # disable folder syncronisation by default
         d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
       else
-        # put your syncted folder configuration here. see: https://www.vagrantup.com/docs/synced-folders
-        # By default, Vagrant will share your project directory (the directory with the Vagrantfile) to /vagrant. (CentOS /home/vagrant/sync)
+        # put your syncted folder configuration here,
+        #   see: https://www.vagrantup.com/docs/synced-folders
+        # By default, Vagrant will share your project directory (the directory
+        #   with the Vagrantfile) to /vagrant. (CentOS uses /home/vagrant/sync).
         #
-        # Example: if you want to sync your code with special permissions like web user should be able to read it you can
-        # use optional Variables like :owner, :group, :mount_options
+        # Example: if you want to sync your code with special permissions
+        #   like web user should be able to read it you can
+        #   use optional Variables like :owner, :group, :mount_options
+        #   NOTE: This works for vagrant provider virtualbox.
         # d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
       end
 
-      # manage ansible groups
+      # manage Ansible inventory groups
       if vms[key]['groups'].count() > 0
         vms[key]['groups'].each do |group|
           if groups.include?(group) == false
@@ -100,14 +121,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         end
       end
 
-      # add ipadress as host variable
-      if ip != ''
-        host_vars[vms[key]['name']] = { "slpnhek_ip_address" => "#{ip}"}
-      end
-
-
+      # This allows to run the Ansible provisioner ONCE for any number
+      #   of VMs.
       if machine_id == vms.count()
-        # for windows users istall this vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
+        # Windows control stations can install an Ansible provisioner
+        #   running on the VM
+        #   - vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
         provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
 
         # run ansible provisioning
@@ -136,13 +155,14 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
       d.vm.provider :virtualbox do |v|
         v.customize 'pre-boot', ['modifyvm', :id, '--nictype1', 'virtio']
-        v.customize [ 'modifyvm', :id, '--name', "#{vms[key]['name']}", '--memory', "#{mem}", '--cpus', "#{cpu}"]
+        v.customize ['modifyvm', :id, '--name', vms[key]['name'], '--memory', mem, '--cpus', cpu]
 
-        # fix for Virtual-Box and synced_folder: http://www.ahtik.com/blog/fixing-your-virtualbox-shared-folder-symlink-error/
+        # fix for Virtual-Box and synced_folder:
+        #   http://www.ahtik.com/blog/fixing-your-virtualbox-shared-folder-symlink-error/
         #
-        # if synced == true
-        #    v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
-        # end
+        #if synced
+        #  v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
+        #end
       end
 
       d.vm.provider :libvirt do |lv|
