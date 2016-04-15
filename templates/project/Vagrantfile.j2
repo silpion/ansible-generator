@@ -20,41 +20,34 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   #   - vagrant plugin: https://github.com/maoueh/nugrant
   #
   # defaults for user configurable items
-  vm_box = 'ubuntu/trusty64'        # vm.box
-  vm_synced_folders = false         # vm.synced_folders
-  vm_box_check_update = false       # vm.check_update
+  cfg = {
+    'vm' => {
+      'box' => 'ubuntu/trusty64',
+      'check_update' => false,
+      'synced_folders' => false
+    },
+    'provisioner' => {
+      'ansible' => {
+        'verbose' => nil,
+        'ask_sudo_pass' => false,
+        'ask_vault_pass' => false
+      }
+    }
+  }
 
-  ansible_verbose = nil             # provisioner.ansible.verbose
-  ansible_ask_sudo_pass = false     # provisioner.ansible.ask_sudo_pass
-  ansible_ask_vault_pass = false    # provisioner.ansible.ask_vault_pass
-
-  # parse user configuration to possibly overwrite defaults
   if Vagrant.has_plugin?('nugrant')
-    if config.user.has_key?('vm')
-      vm_box = config.user.vm.has_key?('box') ? config.user.vm.box : vm_box
-      vm_box_check_update = config.user.vm.has_key?('check_update') ?
-        config.user.vm.check_update : vm_box_check_update
-      vm_synced_folders = config.user.vm.has_key?('synced_folders') ?
-        config.user.vm.synced_folders : vm_synced_folders
-    end
-
-    if config.user.has_key?('provisioner')
-      if config.user.provisioner.has_key?('ansible')
-        ansible_verbose = config.user.provisioner.ansible.has_key?('verbose') ?
-          config.user.provisioner.ansible.verbose : ansible_verbose
-        ansible_ask_sudo_pass = config.user.provisioner.ansible.has_key?('ask_sudo_pass') ?
-          config.user.provisioner.ansible.ask_sudo_pass : ansible_ask_sudo_pass
-        ansible_ask_vault_pass = config.user.provisioner.ansible.has_key?('ask_vault_pass') ?
-          config.user.provisioner.ansible.ask_vault_pass : ansible_ask_vault_pass
-      end
-    end
+    # get defaults from cfg as user defaults
+    config.user.defaults = cfg
+    c = config.user
+  else
+    c = cfg
   end
 
   # configure base-image
   #   this might be configured on a per-VM basis as well
-  config.vm.box = ENV['VAGRANT_BOXNAME'] || vm_box
+  config.vm.box = ENV['VAGRANT_BOXNAME'] || c.vm.box
   # whether to check for updated box images
-  config.vm.box_check_update = vm_box_check_update
+  config.vm.box_check_update = c.vm.check_update
 
   # configure your vm's add element to array if you need more than one vm
   #
@@ -83,7 +76,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       'name' => '{{ project_name_nodash }}',
       'ip' => {{ project_ip|default('nil') }},
       'ports' => {{ ports|default('{}') }},
-      'synced' => vm_synced_folders,
+      'synced' => c.vm.synced_folders,
       'groups' => ['vagrant']
     }
   }
@@ -194,9 +187,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
           ansible.tags = ENV['ANSIBLE_TAGS']
           ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
           ansible.limit = ENV['ANSIBLE_LIMIT'] || 'vagrant'
-          ansible.verbose = ENV['ANSIBLE_VERBOSE'] || ansible_verbose
-          ansible.ask_sudo_pass = ENV['ANSIBLE_ASK_SUDO_PASS'] || ansible_ask_sudo_pass
-          ansible.ask_vault_pass = ENV['ANSIBLE_ASK_VAULT_PASS'] || ansible_ask_vault_pass
+          ansible.verbose = ENV['ANSIBLE_VERBOSE'] || c.provisioner.ansible.verbose
+          ansible.ask_sudo_pass = ENV['ANSIBLE_ASK_SUDO_PASS'] || c.provisioner.ansible.ask_sudo_pass
+          ansible.ask_vault_pass = ENV['ANSIBLE_ASK_VAULT_PASS'] || c.provisioner.ansible.ask_vault_pass
 
           # add additional raw_arguments
           # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
