@@ -2,15 +2,59 @@
 # -*- mode: ruby -*-
 #
 # This is an example for possible options within vagrant
+#
+# Respected environment variables:
+# VAGRANT_BOXNAME: Configure vagrant base box, default: ubuntu/trusty64
+# ANSIBLE_ASK_SUDO_PASS: Whether Ansible should ask for a sudo password, default: false
+# ANSIBLE_ASK_VAULT_PASS: Whether Ansible should ask for the vault password, default: true
+# ANSIBLE_VERBOSE: Configure Ansible verbosity (e.g. ANSIBLE_VERBOSE=vvv ...), default: ''
+# ANSIBLE_LIMIT: Limit Ansible to the group or host, default: vagrant
+# ANSIBLE_TAGS: Limit Ansible to run tasks with tags, default: ''
+# ANSIBLE_SKIP_TAGS: Limit Ansible to run tasks without tags, default: ''
+# ANSIBLE_RAW_ARGUMENTS: Add any Ansible arguments via Vagrant (e.g. ANSIBLE_RAW_ARGUMENTS="--check" ...), default: ''
 
 VAGRANT_API_VERSION = '2'
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
+  # user based configuration with nugrant
+  #   - vagrant plugin: https://github.com/maoueh/nugrant
+  #
+  # defaults for user configurable items
+  vm_box = 'ubuntu/trusty64'        # vm.box
+  vm_synced_folders = false         # vm.synced_folders
+  vm_box_check_update = false       # vm.check_update
+
+  ansible_verbose = nil             # provisioner.ansible.verbose
+  ansible_ask_sudo_pass = false     # provisioner.ansible.ask_sudo_pass
+  ansible_ask_vault_pass = false    # provisioner.ansible.ask_vault_pass
+
+  # parse user configuration to possibly overwrite defaults
+  if Vagrant.has_plugin?('nugrant')
+    if config.user.has_key?('vm')
+      vm_box = config.user.vm.has_key?('box') ? config.user.vm.box : vm_box
+      vm_box_check_update = config.user.vm.has_key?('check_update') ?
+        config.user.vm.check_update : vm_box_check_update
+      vm_synced_folders = config.user.vm.has_key?('synced_folders') ?
+        config.user.vm.synced_folders : vm_synced_folders
+    end
+
+    if config.user.has_key?('provisioner')
+      if config.user.provisioner.has_key?('ansible')
+        ansible_verbose = config.user.provisioner.ansible.has_key?('verbose') ?
+          config.user.provisioner.ansible.verbose : ansible_verbose
+        ansible_ask_sudo_pass = config.user.provisioner.ansible.has_key?('ask_sudo_pass') ?
+          config.user.provisioner.ansible.ask_sudo_pass : ansible_ask_sudo_pass
+        ansible_ask_vault_pass = config.user.provisioner.ansible.has_key?('ask_vault_pass') ?
+          config.user.provisioner.ansible.ask_vault_pass : ansible_ask_vault_pass
+      end
+    end
+  end
+
   # configure base-image
   #   this might be configured on a per-VM basis as well
-  config.vm.box = ENV['VAGRANT_BOXNAME'] || 'ubuntu/trusty64'
-  # disable box version update check
-  config.vm.box_check_update = false
+  config.vm.box = ENV['VAGRANT_BOXNAME'] || vm_box
+  # whether to check for updated box images
+  config.vm.box_check_update = vm_box_check_update
 
   # configure your vm's add element to array if you need more than one vm
   #
@@ -39,6 +83,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       'name' => '{{ project_name_nodash }}',
       'ip' => {{ project_ip|default('nil') }},
       'ports' => {{ ports|default('{}') }},
+      'synced' => vm_synced_folders,
       'groups' => ['vagrant']
     }
   }
@@ -78,7 +123,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       # "private network"
       if not ip.nil?
         d.vm.network :private_network, :ip => ip
-        # add IP adress as Ansible host var
+        # add IP address as Ansible host var
         host_vars[vms][key]['name'] = { "{{ project_name_nodash }}_ip_address" => ip }
       else
         # "NAT" network with port forwarding
@@ -104,6 +149,11 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         # By default, Vagrant will share your project directory (the directory
         #   with the Vagrantfile) to /vagrant. (CentOS uses /home/vagrant/sync).
         #
+        # Using folder syncronisation might result in Vagrant trying to do NFS
+        #   on the control station, which is a bad idea.
+        #   When dealing with Vagrant and folder syncronisation, stay careful!
+        #   In most cases folder syncronisation is not required at all.
+        #
         # Example: if you want to sync your code with special permissions
         #   like web user should be able to read it you can
         #   use optional Variables like :owner, :group, :mount_options
@@ -127,20 +177,26 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         # Windows control stations can install an Ansible provisioner
         #   running on the VM
         #   - vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
+        #
+        # NOTE: This style of provisioning any number of VMs on a windows
+        #   workstation will not function properly.
+        #   The following code is a placeholder for future reference, when it
+        #   comes to heterogen Vagrant environments.
         provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
 
         # run ansible provisioning
         d.vm.provision provisioner do |ansible|
           ansible.playbook = 'playbook.yml'
-          ansible.tags = ENV['ANSIBLE_TAGS']
-          ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
-          ansible.verbose = ENV['ANSIBLE_VERBOSE']
-          ansible.ask_sudo_pass = ENV['ANSIBLE_SUDO_PASS']
           ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
           ansible.galaxy_role_file = 'requirements.yml'
           ansible.groups = groups
-          ansible.limit = ENV['ANSIBLE_LIMIT'] || 'vagrant'
           ansible.host_vars = host_vars
+          ansible.tags = ENV['ANSIBLE_TAGS']
+          ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
+          ansible.limit = ENV['ANSIBLE_LIMIT'] || 'vagrant'
+          ansible.verbose = ENV['ANSIBLE_VERBOSE'] || ansible_verbose
+          ansible.ask_sudo_pass = ENV['ANSIBLE_ASK_SUDO_PASS'] || ansible_ask_sudo_pass
+          ansible.ask_vault_pass = ENV['ANSIBLE_ASK_VAULT_PASS'] || ansible_ask_vault_pass
 
           # add additional raw_arguments
           # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
