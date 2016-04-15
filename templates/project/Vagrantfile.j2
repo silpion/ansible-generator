@@ -45,9 +45,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
   # configure base-image
   #   this might be configured on a per-VM basis as well
-  config.vm.box = ENV['VAGRANT_BOXNAME'] || c.vm.box
+  config.vm.box = ENV['VAGRANT_BOXNAME'] || c['vm']['box']
   # whether to check for updated box images
-  config.vm.box_check_update = c.vm.check_update
+  config.vm.box_check_update = c['vm']['check_update']
 
   # configure your vm's add element to array if you need more than one vm
   #
@@ -76,7 +76,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       'name' => '{{ project_name_nodash }}',
       'ip' => {{ project_ip|default('nil') }},
       'ports' => {{ ports|default('{}') }},
-      'synced' => c.vm.synced_folders,
+      'synced' => c['vm']['synced_folders'],
       'groups' => ['vagrant']
     }
   }
@@ -187,9 +187,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
           ansible.tags = ENV['ANSIBLE_TAGS']
           ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
           ansible.limit = ENV['ANSIBLE_LIMIT'] || 'vagrant'
-          ansible.verbose = ENV['ANSIBLE_VERBOSE'] || c.provisioner.ansible.verbose
-          ansible.ask_sudo_pass = ENV['ANSIBLE_ASK_SUDO_PASS'] || c.provisioner.ansible.ask_sudo_pass
-          ansible.ask_vault_pass = ENV['ANSIBLE_ASK_VAULT_PASS'] || c.provisioner.ansible.ask_vault_pass
+          ansible.verbose = ENV['ANSIBLE_VERBOSE'] || c['provisioner']['ansible']['verbose']
+          ansible.ask_sudo_pass = ENV['ANSIBLE_ASK_SUDO_PASS'] || c['provisioner']['ansible']['ask_sudo_pass']
+          ansible.ask_vault_pass = ENV['ANSIBLE_ASK_VAULT_PASS'] || c['provisioner']['ansible']['ask_vault_pass']
 
           # add additional raw_arguments
           # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
