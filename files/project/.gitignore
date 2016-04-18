@@ -25,6 +25,7 @@ Gemfile.lock
 /tmp/
 envvars-vagrant
 \.*\.swp
+\.environ
 
 # Ansible specific
 roles/*

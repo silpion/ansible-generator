@@ -25,3 +25,4 @@ Gemfile.lock
 /tmp/
 envvars-vagrant
 \.*\.swp
+\.environ
