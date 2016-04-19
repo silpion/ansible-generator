@@ -117,7 +117,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       if not ip.nil?
         d.vm.network :private_network, :ip => ip
         # add IP address as Ansible host var
-        host_vars[vms][key]['name'] = { "{{ project_name_nodash }}_ip_address" => ip }
+        host_vars[vms[key]['name']] = { "{{ project_name_nodash }}_ip_address" => ip }
       else
         # "NAT" network with port forwarding
         if ports.count() > 0
