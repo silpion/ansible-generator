@@ -17,6 +17,9 @@ Gemfile.lock
 /\.project
 /\.settings/
 
+# Emacs
+.*~
+
 # Mac
 **/\.DS_Store
 
