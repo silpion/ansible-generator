@@ -19,7 +19,8 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 * ``role_name``: Name of the role without prefix (string, default: ``<empty>``, **mandatory**)
 * ``role_path``: Base path of the role fed to *--init-path* from *ansible-galaxy init* (string, default: ``<empty>``, **mandatory**)
 * ``role_prefix``: Directory name prefix for the role (string, choices ['ansible', 'galaxy', 'silpion', 'infra'], default: ``ansible``)
-* ``update``: Wether to update the TDD functionality for an existing role (boolean, default: ``false``)
+* ``update``: Whether to update the TDD functionality for an existing role (boolean, default: ``false``)
+* ``git``: Whether to manage the created role with Git (boolean, default: ``true``)
 
 ### ansible-playbook
 
@@ -30,7 +31,21 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 
 ## project.yml
 
-Not implemented yet.
+### Playbook variables
+
+This playbook requires two variables from the user which must be set
+using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
+
+* ``project_name``: Name of the project (string, default: ``<empty>``, **mandatory**)
+* ``project_path``: Base path of the project (string, default: ``<empty>``, **mandatory**)
+
+### ansible-playbook
+
+    ansible-playbook \
+      -e project_name=testproject \
+      -e project_path=$HOME/work/git/projects \
+      project.yml
+
 
 
 <!-- vim: set nofen ts=4 sw=4 et: -->
