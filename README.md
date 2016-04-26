@@ -31,7 +31,21 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 
 ## project.yml
 
-Not implemented yet.
+### Playbook variables
+
+This playbook requires two variables from the user which must be set
+using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
+
+* ``project_name``: Name of the project (string, default: ``<empty>``, **mandatory**)
+* ``project_path``: Base path of the project (string, default: ``<empty>``, **mandatory**)
+
+### ansible-playbook
+
+    ansible-playbook \
+      -e project_name=testproject \
+      -e project_path=$HOME/work/git/projects \
+      project.yml
+
 
 
 <!-- vim: set nofen ts=4 sw=4 et: -->

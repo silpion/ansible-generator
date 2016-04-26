@@ -10,50 +10,58 @@
     - git: true
   tasks:
     - name: Verify user input for required variables
+      tags: role
       assert:
         that:
-          - role_name != ""
-          - role_path != ""
+          - role_name !=  ""
+          - role_path !=  ""
           - role_prefix in ['ansible', 'galaxy', 'silpion', 'infra']
 
     - name: Set role_name_nodash
+      tags: role
       set_fact:
-        role_name_nodash="{{ role_name | replace("-","") }}"
+        role_name_nodash: "{{ role_name|regex_replace('[^a-zA-Z0-9]', '') }}"
 
     - name: Install Ansible role
-      local_action: command ansible-galaxy init --init-path {{ role_path }} {{ role_prefix }}-{{ role_name }}
-        creates={{ role_path }}/{{ role_prefix}}-{{ role_name }}
+      tags: role
+      command: "ansible-galaxy init --init-path {{ role_path }} {{ role_prefix }}-{{ role_name }}"
+      args:
+        creates: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
 
     - name: Install .gitignore
-      local_action: copy
-        mode=0600
-        force=false
-        src=files/.gitignore
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/.gitignore
+      tags: role
+      copy:
+        mode: 0600
+        force: false
+        src: files/role/.gitignore
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/.gitignore"
 
     - name: Install static files
+      tags: role
       with_items:
         - CHANGELOG.md
         - LICENSE
         - VERSION
-      local_action: copy
-        mode=0600
-        force=false
-        src=files/{{ item }}
-        dest={{ role_path }}/{{ role_prefix }}-{{ role_name }}/{{ item }}
+      copy:
+        mode: 0600
+        force: false
+        src: "files/role/{{ item }}"
+        dest: "{{ role_path }}/{{ role_prefix }}-{{ role_name }}/{{ item }}"
 
     - name: Install directories
+      tags: role
       with_items:
         - rake
         - scripts
         - spec/default
         - spec/lib
         - tests
-      local_action: file
-        state=directory
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
+      file:
+        state: directory
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
     - name: Install static files for TDD
+      tags: role
       with_items:
         - ansible.cfg
         - Gemfile
@@ -65,66 +73,77 @@
         - tests/hosts
         - tests/silpion-insecure-private-key
         - .travis.yml
-      local_action: copy
-        mode=0600
-        src=files/{{ item }}
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
+      copy:
+        mode: 0600
+        src: "files/role/{{ item }}"
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
     - name: Install templates
+      tags: role
       with_items:
         - README.md
         - tests/playbook.yml
         - vars/main.yml
       when: not update
-      local_action: template
-        mode=0600
-        src=templates/{{ item }}.j2
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
+      template:
+        mode: 0600
+        src: "templates/role/{{ item }}.j2"
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
     - name: Install templates for TDD
+      tags: role
       with_items:
         - tests/docker.yml
         - Vagrantfile
         - envvars-vagrant.sample
         - rake/vagrant.rb
-      local_action: template
-        mode=0600
-        src=templates/{{ item }}.j2
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
+      template:
+        mode: 0600
+        src: "templates/role/{{ item }}.j2"
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
     - name: Install spec integration test file
-      local_action: copy
-        mode=0600
-        force=false
-        src=files/spec/default/rolename_spec.rb
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/spec/default/{{ role_name }}_spec.rb
+      tags: role
+      copy:
+        mode: 0600
+        force: false
+        src: files/role/spec/default/rolename_spec.rb
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/spec/default/{{ role_name }}_spec.rb"
 
     - name: Install scripts
+      tags: role
       with_items:
         - scripts/release.sh
-      local_action: copy
-        mode=0755
-        src=files/{{ item }}
-        dest={{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}
+      copy:
+        mode: 0755
+        src: "files/role/{{ item }}"
+        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
     - name: git init...
+      tags: role
       when: git
       register: generater_git_init
-      local_action: command git init
-        chdir={{ role_path }}/{{ role_prefix}}-{{ role_name }}
-        creates={{ role_path }}/{{ role_prefix}}-{{ role_name }}/.git
+      command: git init
+      args:
+        chdir: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
+        creates: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/.git"
 
     - name: git add...
+      tags: role
       register: generator_git_add
       when: generater_git_init.changed
-      local_action: command git add .
-        chdir={{ role_path }}/{{ role_prefix}}-{{ role_name }}
+      command: git add .
+      args:
+        chdir: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
 
     - name: git commit...
+      tags: role
       when: generator_git_add.changed
-      local_action: command git commit -m 'Root commit (ansible-generator)'
-        chdir={{ role_path }}/{{ role_prefix}}-{{ role_name }}
+      command: git commit -m 'Root commit (ansible-generator)'
+      args:
+        chdir: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
 
     - name: echo {{ role_path }}/{{ role_prefix }}-{{ role_name }}
-      local_action: debug
-        msg="Find the Ansible role at {{ role_path }}/{{ role_prefix }}-{{ role_name }}"
+      tags: role
+      debug:
+        msg: "Find the Ansible role at {{ role_path }}/{{ role_prefix }}-{{ role_name }}"

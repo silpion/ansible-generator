@@ -1,0 +1,223 @@
+# vim: set ft=ruby ts=2 sw=2 et:
+# -*- mode: ruby -*-
+#
+# This is an example for possible options within vagrant
+#
+# Respected environment variables:
+# VAGRANT_BOXNAME: Configure vagrant base box, default: ubuntu/trusty64
+# ANSIBLE_ASK_SUDO_PASS: Whether Ansible should ask for a sudo password, default: false
+# ANSIBLE_ASK_VAULT_PASS: Whether Ansible should ask for the vault password, default: true
+# ANSIBLE_VERBOSE: Configure Ansible verbosity (e.g. ANSIBLE_VERBOSE=vvv ...), default: ''
+# ANSIBLE_LIMIT: Limit Ansible to the group or host, default: vagrant
+# ANSIBLE_TAGS: Limit Ansible to run tasks with tags, default: ''
+# ANSIBLE_SKIP_TAGS: Limit Ansible to run tasks without tags, default: ''
+# ANSIBLE_RAW_ARGUMENTS: Add any Ansible arguments via Vagrant (e.g. ANSIBLE_RAW_ARGUMENTS="--check" ...), default: ''
+
+VAGRANT_API_VERSION = '2'
+Vagrant.configure(VAGRANT_API_VERSION) do |config|
+
+  # user based configuration with nugrant
+  #   - vagrant plugin: https://github.com/maoueh/nugrant
+  #
+  # defaults for user configurable items
+  cfg = {
+    'vm' => {
+      'box' => 'ubuntu/trusty64',
+      'check_update' => false,
+      'synced_folders' => false
+    },
+    'provisioner' => {
+      'ansible' => {
+        'verbose' => nil,
+        'ask_sudo_pass' => false,
+        'ask_vault_pass' => false
+      }
+    }
+  }
+
+  if Vagrant.has_plugin?('nugrant')
+    # get defaults from cfg as user defaults
+    config.user.defaults = cfg
+    c = config.user
+  else
+    c = cfg
+  end
+
+  # configure base-image
+  #   this might be configured on a per-VM basis as well
+  config.vm.box = ENV['VAGRANT_BOXNAME'] || c['vm']['box']
+  # whether to check for updated box images
+  config.vm.box_check_update = c['vm']['check_update']
+
+  # configure your vm's add element to array if you need more than one vm
+  #
+  #  vms = {
+  #    '{{ project_name_nodash }}1 => {
+  #      'name' => '{{ project_name_nodash }}-db-01',
+  #      'mem' => '256',
+  #      'groups' => ['vagrant','db']
+  #    },
+  #    '{{ project_name_nodash }}2 => {
+  #      'name' => '{{ project_name_nodash }}-db-02',
+  #      'cpu' => '2',
+  #      'mem' => '256',
+  #      'groups' => ['vagrant','db']
+  #    }
+  #    '{{ project_name_nodash }}3 => {
+  #      'name' => '{{ project_name_nodash }}-web-01
+  #      'port' => {'8080' => '80'}       # {'host' => 'guest'}
+  #      'groups' => ['vagrant','web']
+  #      'synced' => true
+  #    }
+  #  }
+
+  vms = {
+    '{{ project_name_nodash }}1' => {
+      'name' => '{{ project_name_nodash }}',
+      'ip' => {{ project_ip|default('nil') }},
+      'ports' => {{ ports|default('{}') }},
+      'synced' => c['vm']['synced_folders'],
+      'groups' => ['vagrant']
+    }
+  }
+
+  groups = {}
+  host_vars = {}
+
+  (1..vms.count()).each do |machine_id|
+    key = "{{ project_name_nodash }}#{machine_id}"
+
+    # defaults configuration
+    #   network configuration
+    #     if `ip' is configured, Vagrant will use a private network based on this ip
+    ip = vms[key]['ip'] || nil
+
+    #     if `ip' is empty string and `ports' is dictionary, NAT based networking
+    #     with port forwarding is used. ports maps HOST_PORT => GUEST_PORT.
+    #
+    #     ports = { HOST_PORT => GUEST_PORT }
+    #     ports = { 8080 => 8080, 27017 => 27017 }
+    ports = vms[key]['ports'] || {}
+
+    # Whether to allow Vagrant to syncronize the project directory from host
+    #   to guest.
+    synced = vms[key]['synced'] || false
+
+    # Configure CPU and Memory per VM
+    cpu = vms[key]['cpu'] || 1
+    mem = vms[key]['mem'] || 1024
+
+    # setup/configure VMs
+    config.vm.define :"#{vms[key]['name']}" do |d|
+
+      # set hostname
+      d.vm.hostname = vms[key]['name']
+
+      # "private network"
+      if not ip.nil?
+        d.vm.network :private_network, :ip => ip
+        # add IP address as Ansible host var
+        host_vars[vms[key]['name']] = { "{{ project_name_nodash }}_ip_address" => ip }
+      else
+        # "NAT" network with port forwarding
+        if ports.count() > 0
+          ports.each do |h, g|
+            d.vm.network :forwarded_port, :host => h, :guest => g
+          end
+        else
+          # "public" (bridged) network - USE WITH CARE!
+          d.vm.network :public_network, :use_dhcp_assigned_default_route => true
+          d.ssh.forward_agent = true
+        end
+      end
+
+      # manage synced folders
+      # CentOS Box uses  /home/vagrant/sync
+      if not synced
+        # disable folder syncronisation by default
+        d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
+      else
+        # put your syncted folder configuration here,
+        #   see: https://www.vagrantup.com/docs/synced-folders
+        # By default, Vagrant will share your project directory (the directory
+        #   with the Vagrantfile) to /vagrant. (CentOS uses /home/vagrant/sync).
+        #
+        # Using folder syncronisation might result in Vagrant trying to do NFS
+        #   on the control station, which is a bad idea.
+        #   When dealing with Vagrant and folder syncronisation, stay careful!
+        #   In most cases folder syncronisation is not required at all.
+        #
+        # Example: if you want to sync your code with special permissions
+        #   like web user should be able to read it you can
+        #   use optional Variables like :owner, :group, :mount_options
+        #   NOTE: This works for vagrant provider virtualbox.
+        # d.vm.synced_folder '.', '/vagrant', :owner => 'www-data', :group => 'www-data', :mount_options => ["dmode=775,fmode=664"]
+      end
+
+      # manage Ansible inventory groups
+      if vms[key]['groups'].count() > 0
+        vms[key]['groups'].each do |group|
+          if groups.include?(group) == false
+            groups[group] = []
+          end
+          groups[group].push(vms[key]['name'])
+        end
+      end
+
+      # This allows to run the Ansible provisioner ONCE for any number
+      #   of VMs.
+      if machine_id == vms.count()
+        # Windows control stations can install an Ansible provisioner
+        #   running on the VM
+        #   - vagrant-plugin: https://github.com/vovimayhem/vagrant-guest_ansible
+        #
+        # NOTE: This style of provisioning any number of VMs on a windows
+        #   workstation will not function properly.
+        #   The following code is a placeholder for future reference, when it
+        #   comes to heterogen Vagrant environments.
+        provisioner = Vagrant::Util::Platform.windows? ? :guest_ansible : :ansible
+
+        # run ansible provisioning
+        d.vm.provision provisioner do |ansible|
+          ansible.playbook = 'playbook.yml'
+          ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
+          ansible.galaxy_role_file = 'requirements.yml'
+          ansible.groups = groups
+          ansible.host_vars = host_vars
+          ansible.tags = ENV['ANSIBLE_TAGS']
+          ansible.skip_tags = ENV['ANSIBLE_SKIP_TAGS']
+          ansible.limit = ENV['ANSIBLE_LIMIT'] || 'vagrant'
+          ansible.verbose = ENV['ANSIBLE_VERBOSE'] || c['provisioner']['ansible']['verbose']
+          ansible.ask_sudo_pass = ENV['ANSIBLE_ASK_SUDO_PASS'] || c['provisioner']['ansible']['ask_sudo_pass']
+          ansible.ask_vault_pass = ENV['ANSIBLE_ASK_VAULT_PASS'] || c['provisioner']['ansible']['ask_vault_pass']
+
+          # add additional raw_arguments
+          # ANSIBLE_RAW_ARGUMENTS="--check --diff" vagrant up
+          ansible.raw_arguments = Shellwords.shellsplit(ENV['ANSIBLE_RAW_ARGUMENTS']) if ENV['ANSIBLE_RAW_ARGUMENTS']
+
+          # configure dynamic vagrant  inventory
+          ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
+            ansible.inventory_path = '.vagrant/provisioners/ansible/inventory/'
+          end
+        end
+      end
+
+      d.vm.provider :virtualbox do |v|
+        v.customize 'pre-boot', ['modifyvm', :id, '--nictype1', 'virtio']
+        v.customize ['modifyvm', :id, '--name', vms[key]['name'], '--memory', mem, '--cpus', cpu]
+
+        # fix for Virtual-Box and synced_folder:
+        #   http://www.ahtik.com/blog/fixing-your-virtualbox-shared-folder-symlink-error/
+        #
+        #if synced
+        #  v.customize ['setextradata', :id, 'VBoxInternal2/SharedFoldersEnableSymlinksCreate/src', '1']
+        #end
+      end
+
+      d.vm.provider :libvirt do |lv|
+        lv.memory = mem
+        lv.cpus = cpu
+      end
+    end
+  end
+end

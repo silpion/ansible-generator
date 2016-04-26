@@ -17,6 +17,9 @@ Gemfile.lock
 /\.project
 /\.settings/
 
+# Emacs
+.*~
+
 # Mac
 **/\.DS_Store
 
@@ -25,3 +28,7 @@ Gemfile.lock
 /tmp/
 envvars-vagrant
 \.*\.swp
+\.environ
+
+# Ansible specific
+roles/*

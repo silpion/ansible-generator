@@ -1,0 +1,6 @@
+---
+- src: git+ssh://git@git.silpion.de:2222/isar/ansible-util.git
+  name: silpion.util
+
+- src: git+ssh://git@git.silpion.de:2222/isar/ansible-machineid.git
+  name: silpion.machineid

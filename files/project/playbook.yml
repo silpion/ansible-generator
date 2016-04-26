@@ -1,0 +1,5 @@
+---
+- hosts: all
+  roles:
+    - silpion.util
+    - silpion.machineid
