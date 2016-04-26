@@ -1,3 +1,70 @@
+# 1.0.0
+
+Anja Siek (24):
+
+* add project generator code
+* update Vagrantfile to automated do ansible-galaxy install requirements.yml
+* fix typo
+* fix coding guidelines issues
+* rename file
+* remove inventory-path becouse it can not be used with Vagrant environments
+* mv templates and files in subdirectories; remove local\_action; update codingstyle in role-playbook
+* remove roled-dir; change file=touch to copy empty content becouse touch always triggers changed
+* update synced\_folder configuration and documentation
+* add some documentation
+* fix ip-address 'problem' and update raw\_arguments in Vagrantfile
+* fix variable wording error
+* fix broken Vagrantfile
+* remove multiplaybooks becouse of reusability of variables
+* update libvirt variables
+* fix README.md error
+* use nodash variable
+* add default group
+* use variable for url
+* fix Vagrantfile
+* remove all special chars from variable project\_name\_nodash
+* add requirements.yml run; fix different resource sizes
+* define defaults; fix multi-vm-setup
+* add emacs backup files to gitignore
+
+Georg Hopp (17):
+
+* Fix location reference and namig of template files.
+* Fix host\_vars naming
+* Create empty predefined playbooks.
+* Enable pipelining in generated project (conditionally).
+* Add bootstrap.yml template
+* Fix section ssh\_connection in ansible.cfg template
+* We need inventory as pointer to the hosts file.
+* Add empty subfolders dev, prod and test under group\_vars.
+* Make use of ansible-util which deactivates requiretty now
+* file: => src:
+
+* Add playbook.yml which only includes the other playbooks.
+* Add basic README's for the predefined stages
+* Add machineid role to all playbooks.
+* fix project.jml example
+* don't try to copy no longer used playbooks (bootstrap.yml, infrastructure.yml)
+* Improve group management / enable paralell ansible runs with vagrant.
+* fix vm name
+
+Mark Kusch (13):
+
+* Add documentation for the git var in role.yml
+* Use YAML highlighting in role documentation for the example playbook
+* Use shell syntax highlighting for code blocks in role documentation
+* Use digits to refer booleans in ansible.cfg
+* Fix deprecation warning for bare variables
+* Use Ruby data types in Vagrantfile for projects (and update some comments)
+* Use re to strip disallowed characters from role names for internal ansible usage
+* Do not enforce role versions for util and machineid when generating a project boilerplate
+* Fixup nugrant based user configuration evaluation
+* Trivialise nugrant user configuration (draft)
+* Fix no such method in nugrant user configuration
+* Do not maintain user specific environment configuration with git
+* Fix Ruby syntax error when setting host vars
+
+
 # 0.9.2
 
 
