@@ -79,7 +79,6 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   vms = {
     '{{ project_name_nodash }}1' => {
       'name' => '{{ project_name_nodash }}',
-      'ports' => {{ ports|default('{}') }},
       'synced' => c['vm']['synced_folders'],
       'groups' => ['vagrant'],
       'network' => {
@@ -90,8 +89,8 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         # If set, this ip will get allocated to the VM
         'private_ip' => {{ project_ip|default('nil') }},
         # Ports to forward into the VM, format:
-        #  ports = { HOST_PORT => GUEST_PORT }
-        #  ports = { 8080 => 8080, 27017 => 27017 }
+        #  mapped_ports = { HOST_PORT => GUEST_PORT }
+        #  mapped_ports = { 8080 => 8080, 27017 => 27017 }
         'mapped_ports' => {{ project_ports|default('{}') }}
       }
     }
@@ -107,7 +106,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     network = vms[key]['network'] || {}
     public_bridge = network['public_bridge'] || nil
     ip = network['private_ip'] || nil
-    ports = network['ports'] || {}
+    ports = network['mapped_ports'] || {}
 
 
     # Whether to allow Vagrant to syncronize the project directory from host
