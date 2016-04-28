@@ -106,7 +106,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     # Set networking defaults
     network = vms[key]['network'] || {}
     public_bridge = network['public_bridge'] || nil
-    ip = network['ip'] || nil
+    ip = network['private_ip'] || nil
     ports = network['ports'] || {}
 
 
