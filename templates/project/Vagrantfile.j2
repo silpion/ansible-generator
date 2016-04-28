@@ -60,19 +60,20 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   #     	 'public_bridge' => {{ project_public|default('nil') }},
   #      	 'private_ip' => {{ project_ip|default('nil') }},
   #      	 'mapped_ports' => {{ project_ports|default('{}') }}
-  #        },
+  #      },
   #    },
   #    '{{ project_name_nodash }}2 => {
   #      'name' => '{{ project_name_nodash }}-db-02',
   #      'cpu' => '2',
   #      'mem' => '256',
   #      'groups' => ['vagrant','db']
-  #    }
+  #    },
   #    '{{ project_name_nodash }}3 => {
   #      'name' => '{{ project_name_nodash }}-web-01
-  #      'port' => {'8080' => '80'}       # {'host' => 'guest'}
+  #      'network' => {
+  #        'mapped_ports' => {'8080' => '80'}    # {'host' => 'guest'}
+  #      },
   #      'groups' => ['vagrant','web']
-  #      'synced' => true
   #    }
   #  }
 
