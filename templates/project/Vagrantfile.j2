@@ -99,6 +99,10 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     #     ports = { 8080 => 8080, 27017 => 27017 }
     ports = vms[key]['ports'] || {}
 
+    # If this is set to true, Vagrant will use a public bridge
+    # This mean anyone on the same network can connect to your box
+    public = vms[key]['public'] || false
+
     # Whether to allow Vagrant to syncronize the project directory from host
     #   to guest.
     synced = vms[key]['synced'] || false
@@ -124,7 +128,9 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
           ports.each do |h, g|
             d.vm.network :forwarded_port, :host => h, :guest => g
           end
-        else
+      end
+
+      if public
           # "public" (bridged) network - USE WITH CARE!
           d.vm.network :public_network, :use_dhcp_assigned_default_route => true
           d.ssh.forward_agent = true
