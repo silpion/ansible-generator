@@ -55,29 +55,45 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   #    '{{ project_name_nodash }}1 => {
   #      'name' => '{{ project_name_nodash }}-db-01',
   #      'mem' => '256',
-  #      'groups' => ['vagrant','db']
+  #      'groups' => ['vagrant','db'],
+  #      'network' => {
+  #     	 'public_bridge' => {{ project_public|default('nil') }},
+  #      	 'private_ip' => {{ project_ip|default('nil') }},
+  #      	 'mapped_ports' => {{ project_ports|default('{}') }}
+  #      },
   #    },
   #    '{{ project_name_nodash }}2 => {
   #      'name' => '{{ project_name_nodash }}-db-02',
   #      'cpu' => '2',
   #      'mem' => '256',
   #      'groups' => ['vagrant','db']
-  #    }
+  #    },
   #    '{{ project_name_nodash }}3 => {
   #      'name' => '{{ project_name_nodash }}-web-01
-  #      'port' => {'8080' => '80'}       # {'host' => 'guest'}
+  #      'network' => {
+  #        'mapped_ports' => {'8080' => '80'}    # {'host' => 'guest'}
+  #      },
   #      'groups' => ['vagrant','web']
-  #      'synced' => true
   #    }
   #  }
 
   vms = {
     '{{ project_name_nodash }}1' => {
       'name' => '{{ project_name_nodash }}',
-      'ip' => {{ project_ip|default('nil') }},
-      'ports' => {{ ports|default('{}') }},
       'synced' => c['vm']['synced_folders'],
-      'groups' => ['vagrant']
+      'groups' => ['vagrant'],
+      'network' => {
+        # Network configuration
+        #	If public_bridge is true, your VM will get exposed on the network
+        #	This may be usefull to grant access to colleagues but is a huge security risk
+        'public_bridge' => {{ project_public|default('nil') }},
+        # If set, this ip will get allocated to the VM
+        'private_ip' => {{ project_ip|default('nil') }},
+        # Ports to forward into the VM, format:
+        #  mapped_ports = { HOST_PORT => GUEST_PORT }
+        #  mapped_ports = { 8080 => 8080, 27017 => 27017 }
+        'mapped_ports' => {{ project_ports|default('{}') }}
+      }
     }
   }
 
@@ -87,17 +103,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   (1..vms.count()).each do |machine_id|
     key = "{{ project_name_nodash }}#{machine_id}"
 
-    # defaults configuration
-    #   network configuration
-    #     if `ip' is configured, Vagrant will use a private network based on this ip
-    ip = vms[key]['ip'] || nil
+    # Set networking defaults
+    network = vms[key]['network'] || {}
+    public_bridge = network['public_bridge'] || nil
+    ip = network['private_ip'] || nil
+    ports = network['mapped_ports'] || {}
 
-    #     if `ip' is empty string and `ports' is dictionary, NAT based networking
-    #     with port forwarding is used. ports maps HOST_PORT => GUEST_PORT.
-    #
-    #     ports = { HOST_PORT => GUEST_PORT }
-    #     ports = { 8080 => 8080, 27017 => 27017 }
-    ports = vms[key]['ports'] || {}
 
     # Whether to allow Vagrant to syncronize the project directory from host
     #   to guest.
@@ -118,17 +129,19 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         d.vm.network :private_network, :ip => ip
         # add IP address as Ansible host var
         host_vars[vms[key]['name']] = { "{{ project_name_nodash }}_ip_address" => ip }
-      else
-        # "NAT" network with port forwarding
-        if ports.count() > 0
-          ports.each do |h, g|
-            d.vm.network :forwarded_port, :host => h, :guest => g
-          end
-        else
+      end
+
+      # "NAT" network with port forwarding
+      if ports.count() > 0
+        ports.each do |h, g|
+          d.vm.network :forwarded_port, :host => h, :guest => g
+        end
+      end
+
+      if not public_bridge.nil?
           # "public" (bridged) network - USE WITH CARE!
           d.vm.network :public_network, :use_dhcp_assigned_default_route => true
           d.ssh.forward_agent = true
-        end
       end
 
       # manage synced folders
@@ -137,7 +150,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
         # disable folder syncronisation by default
         d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
       else
-        # put your syncted folder configuration here,
+        # put your synced folder configuration here,
         #   see: https://www.vagrantup.com/docs/synced-folders
         # By default, Vagrant will share your project directory (the directory
         #   with the Vagrantfile) to /vagrant. (CentOS uses /home/vagrant/sync).
