@@ -11,13 +11,14 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
   # defaults for user configurable items
   cfg = {
     'vm' => {
-      'box' => 'ubuntu/trusty64',
+      'box' => 'ubuntu/xenial64',
       'check_update' => false,
       'synced_folders' => false
     },
     'provisioner' => {
       'ansible' => {
         'verbose' => nil,
+        'diff' => nil,
         'ask_sudo_pass' => false,
         'ask_vault_pass' => false
       }
@@ -32,6 +33,8 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     c = cfg
   end
 
+
+  # vm configuration
   config.vm.box = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_BOXNAME'] || c['vm']['box']
   config.vm.box_check_update = c['vm']['check_update']
 
@@ -40,28 +43,38 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     d.vm.hostname = 'ansible{{ role_name_nodash }}test'
     if not c['vm']['synced_folders']
       d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
+      d.vm.synced_folder '.', '/home/vagrant/sync', id: 'vagrant-root', disabled: true
     end
 
+    # provisioner configuration
     d.vm.provision :ansible do |ansible|
-      ansible.playbook = 'tests/playbook.yml'
-      ansible.tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_TAGS']
-      ansible.skip_tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
-      ansible.verbose = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_VERBOSE']
-      ansible.galaxy_role_file = 'requirements.yml'
+      # configure ansible-galaxy
+      ansible.galaxy_roles_path = 'tests/roles'
+      ansible.galaxy_role_file = 'tests/requirements.yml'
       ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
+
+      # configure ansible-playbook
+      ansible.playbook = 'tests/playbook.yml'
       ansible.groups = {
         'vagrant' => ['ansible{{ role_name_nodash }}test']
       }
       ansible.limit = 'vagrant'
-      ansible.raw_arguments = [
-        '--diff'
-      ]
+
+      #   dynamic ansible-playbook configuration based on environment variables
+      ansible.tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_TAGS']
+      ansible.skip_tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
+      #   dynamic ansible-playbook configuration based on environment variables or user configuration
+      ansible.verbose = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_VERBOSE'] || c['provisioner']['ansible']['verbose']
+
+      # ansible-playbook raw arguments
+      ansible.raw_arguments = []
+
       if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
         ansible.raw_arguments << '--check'
       end
 
-      ::File.directory?('.vagrant/provisioners/ansible/inventory/') do
-        ansible.inventory_path = '.vagrant/provisioners/ansible/inventory/'
+      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_DIFFMODE'] == '1' or c['provisioner']['ansible']['diff']
+        ansible.raw_arguments << '--diff'
       end
 
     end
@@ -76,6 +89,6 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       lv.cpus = 1
     end
 
-
   end
+
 end
