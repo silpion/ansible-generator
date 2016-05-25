@@ -1,16 +1,35 @@
 ---
-project_dirs:
-  - dest: files
-  - dest: group_vars
-  - dest: group_vars/all
-  - dest: group_vars/prod
-  - dest: group_vars/test
-  - dest: group_vars/stage
-  - dest: group_vars/vagrant
-  - dest: host_vars
-  - dest: templates
-  - dest: vars
+# whether to git init a freshly created project
+project_manage_with_git: true
 
+# install these directories in a project
+project_dirs:
+  - files
+  - group_vars
+  - group_vars/all
+  - group_vars/prod
+  - group_vars/test
+  - group_vars/stage
+  - group_vars/vagrant
+  - host_vars
+  - templates
+  - vars
+
+# project_files configures files to install
+#   This is a list of dictionaries which can decide whether files are
+#   installed with the template or the copy module.
+#
+#   - dest: .gitignore                            mandatory
+#     mode: 644                                   |default(0600)
+#     force: true                                 |default(false)
+#     src: files/project/.gitignore               |default(omit)
+#     content: "foo"                              alternative to src
+#     template: templates/project/.gitignore.j2   alternative to src or content: install dest with template module
+#
+#   template, src and content are mutualy exclusive for its meaning.
+#     There is no technical enforcement for this. It depends on Ansible
+#     what would happen if all keys are available for an item.
+#
 project_files:
   - dest: .gitignore
     src: files/project/.gitignore
@@ -56,4 +75,8 @@ project_files:
   - dest: group_vars/vagrant/general.yml
     template: project/group_vars/vagrant/general.yml.j2
 
+
+# helper vars to ease template and play management
 project_no_ssh_pipelining: False
+
+project_name_nodash: "{{ project_name|regex_replace('[^a-zA-Z0-9]', '') }}"

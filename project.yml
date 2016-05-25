@@ -2,57 +2,65 @@
 - hosts: localhost
   connection: local
   gather_facts: false
-  vars:
-    - project_name: ""
-    - project_path: ""
   tasks:
     - name: Verify user input for required variables
       tags: project
       assert:
         that:
-          - project_name != ""
-          - project_path != ""
+          - project_name is defined
+          - project_path is defined
 
-    - name: Set project_name_nodash
-      set_fact:
-        project_name_nodash: "{{ project_name|regex_replace('[^a-zA-Z0-9]', '') }}"
 
-    - name: Create Directories
+    - name: Ensure project directories
       tags: project
       with_items: "{{ project_dirs }}"
       file:
         state: directory
-        path: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
+        path: "{{ project_path }}/{{ project_name }}/{{ item }}"
 
-    - name: Copy templated Files
+    - name: Install static files
       tags: project
       with_items:
         - "{{ project_files|selectattr('src', 'defined')|list }}"
         - "{{ project_files|selectattr('content', 'defined')|list }}"
       copy:
-        dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         src: "{{ item.src|default(omit) }}"
-        content: "{{ item.content|default(omit) }}"
+        dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
+        mode: "{{ item.mode|default(0600) }}"
         force: "{{ item.force|default(false) }}"
+        content: "{{ item.content|default(omit) }}"
 
-    - name: Create Templated Files
+    - name: Install templated files
       tags: project
       with_items:
         - "{{ project_files|selectattr('template', 'defined')|list }}"
       template:
         src: "templates/{{ item.template }}"
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
+        mode: "{{ item.mode|default(0600) }}"
         force: "{{ item.force|default(false) }}"
 
-    - name: Create empty Files
+    - name: Install empty files
       tags: project
       with_items: "{{ project_files|selectattr('empty', 'defined')|list }}"
       copy:
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         content: ""
+        mode: "{{ item.mode|default(0600) }}"
         force: "{{ item.force|default(false) }}"
 
-    - name: echo {{ project_path }}/{{ project_name }}
+
+    - name: Include tasks to manage git
+      tags:
+        - project
+        - git
+      when: project_manage_with_git
+      include: tasks/git.yml
+      vars:
+        target: "{{ project_path }}/{{ project_name }}"
+
+
+    - name: baem!
       tags: project
       debug:
         msg: "Find the Ansible project at {{ project_path }}/{{ project_name }}"
