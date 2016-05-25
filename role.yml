@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Install Ansible role boilerplate
+  hosts: localhost
   connection: local
   gather_facts: false
   vars:
