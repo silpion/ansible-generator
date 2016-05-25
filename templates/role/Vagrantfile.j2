@@ -5,8 +5,8 @@
 VAGRANT_API_VERSION = '2'
 Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
-  if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_BOXNAME']
-    config.vm.box = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_BOXNAME']
+  if ENV['{{ role_name_tdd|upper }}_VAGRANT_BOXNAME']
+    config.vm.box = ENV['{{ role_name_tdd|upper }}_VAGRANT_BOXNAME']
   else
     config.vm.box = 'ubuntu/trusty64'
   end
@@ -18,12 +18,12 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
     d.vm.provision :ansible do |ansible|
       ansible.playbook = 'tests/playbook.yml'
-      ansible.tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_TAGS']
-      ansible.skip_tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
-      ansible.verbose = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_VERBOSE']
+      ansible.tags = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_TAGS']
+      ansible.skip_tags = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
+      ansible.verbose = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_VERBOSE']
       ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
       ansible.galaxy_role_file = 'requirements.yml'
-      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
+      if ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
         ansible.raw_arguments = '--check'
       end
       ansible.groups = {
@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       ansible.raw_arguments = [
         '--diff'
       ]
-      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
+      if ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
         ansible.raw_arguments << '--check'
       end
 

@@ -1,4 +1,5 @@
 ---
-- hosts: all
+- name: Test {{ role_name_final }}
+  hosts: all
   roles:
-    - { role: {{ role_prefix }}-{{ role_name }} }
+    - {{ role_name_final }}
