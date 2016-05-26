@@ -27,7 +27,7 @@
         src: "{{ item.src|default(omit) }}"
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         mode: "{{ item.mode|default(0600) }}"
-        force: "{{ item.force|default(false) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
         content: "{{ item.content|default(omit) }}"
 
     - name: Install templated files
@@ -38,7 +38,7 @@
         src: "templates/{{ item.template }}"
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         mode: "{{ item.mode|default(0600) }}"
-        force: "{{ item.force|default(false) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
 
     - name: Install empty files
       tags: project
@@ -47,7 +47,7 @@
         dest: "{{ project_path }}/{{ project_name }}/{{ item.dest }}"
         content: ""
         mode: "{{ item.mode|default(0600) }}"
-        force: "{{ item.force|default(false) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
 
 
     - name: Include tasks to manage git

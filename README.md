@@ -20,6 +20,7 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 * ``role_path``: Base path of the role fed to *--init-path* from *ansible-galaxy init* (string, default: ``<empty>``, **mandatory**)
 * ``role_prefix``: Directory name prefix for the role (string, choices ['ansible', 'silpion', 'infra', 'pronto'], default: ``ansible``)
 * ``role_manage_with_git``: Whether to manage the created role with Git (boolean, default: ``true``)
+* ``force``: Whether to force override files (boolean, default: ``false``)
 
 ### ansible-playbook
 
@@ -38,6 +39,7 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 * ``project_name``: Name of the project (string, default: ``<empty>``, **mandatory**)
 * ``project_path``: Base path of the project (string, default: ``<empty>``, **mandatory**)
 * ``project_manage_with_git``: Whether to manage the created project with Git (boolean, default: ``true``)
+* ``force``: Whether to force override files (boolean, default: ``false``)
 
 ### ansible-playbook
 

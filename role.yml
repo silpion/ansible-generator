@@ -36,7 +36,7 @@
         src: "{{ item.src|default(omit) }}"
         dest: "{{ role_dest }}/{{ item.dest|mandatory }}"
         mode: "{{ item.mode|default(0600) }}"
-        force: "{{ item.force|default(false) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
         content: "{{ item.content|default(omit) }}"
 
     - name: Install templated files
@@ -46,7 +46,7 @@
         src: "templates/{{ item.template }}"
         dest: "{{ role_dest }}/{{ item.dest|mandatory }}"
         mode: "{{ item.mode|default(0600) }}"
-        force: "{{ item.force|default(false) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
 
 
     - name: Ensure state absent
