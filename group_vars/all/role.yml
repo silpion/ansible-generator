@@ -74,8 +74,8 @@ role_files:
     src: files/role/ansible.cfg
     force: true
 
-  - dest: tests/playbook.yml
-    template: role/tests/playbook.yml.j2
+  - dest: tests/test.yml
+    template: role/tests/test.yml.j2
     force: false
 
   - dest: tests/hosts

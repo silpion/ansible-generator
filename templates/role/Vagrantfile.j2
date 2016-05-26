@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
     d.vm.synced_folder '.', '/vagrant', id: 'vagrant-root', disabled: true
 
     d.vm.provision :ansible do |ansible|
-      ansible.playbook = 'tests/playbook.yml'
+      ansible.playbook = 'tests/test.yml'
       ansible.tags = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_TAGS']
       ansible.skip_tags = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
       ansible.verbose = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_VERBOSE']
