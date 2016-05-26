@@ -24,10 +24,9 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 
 ### ansible-playbook
 
-    ansible-playbook -i inventory \
-      -e role_name=heka \
-      -e role_path=$HOME/work/git/ansible-roles \
-      role.yml
+```bash
+ansible-playbook -i inventory -e role_name=heka -e role_path=$HOME/work/git/ansible-roles role.yml
+```
 
 ## project.yml
 
@@ -43,10 +42,9 @@ using the ansible-playbook argument ``-e`` (``--extra-vars``). These are
 
 ### ansible-playbook
 
-    ansible-playbook \
-      -e project_name=testproject \
-      -e project_path=$HOME/work/git/projects \
-      project.yml
+```bash
+ansible-playbook -e project_name=testproject -e project_path=$HOME/work/git/projects project.yml
+```
 
 
 <!-- vim: set nofen ts=4 sw=4 et: -->
