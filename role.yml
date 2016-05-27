@@ -72,6 +72,7 @@
         - spec/spec_helper.rb
         - tests/hosts
         - tests/silpion-insecure-private-key
+        - tests/requirements.yml
         - .travis.yml
       copy:
         mode: 0600
