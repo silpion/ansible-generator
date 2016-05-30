@@ -82,6 +82,10 @@ role_files:
     content: localhost
     force: true
 
+  - dest: tests/requirements.yml
+    src: files/role/tests/requirements.yml
+    force: false
+
   - dest: Gemfile
     src: files/role/Gemfile
     force: true
