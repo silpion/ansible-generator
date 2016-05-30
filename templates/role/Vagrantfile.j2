@@ -54,7 +54,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       ansible.galaxy_command = 'ansible-galaxy install --role-file=%{role_file} --roles-path=%{roles_path} --ignore-errors --force'
 
       # configure ansible-playbook
-      ansible.playbook = 'tests/playbook.yml'
+      ansible.playbook = 'tests/test.yml'
       ansible.groups = {
         'vagrant' => ['ansible{{ role_name_nodash }}test']
       }
