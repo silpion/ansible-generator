@@ -35,7 +35,7 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
 
 
   # vm configuration
-  config.vm.box = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_BOXNAME'] || c['vm']['box']
+  config.vm.box = ENV['{{ role_name_tdd|upper }}_VAGRANT_BOXNAME'] || c['vm']['box']
   config.vm.box_check_update = c['vm']['check_update']
 
   config.vm.define :ansible{{ role_name_nodash }}test do |d|
@@ -61,19 +61,19 @@ Vagrant.configure(VAGRANT_API_VERSION) do |config|
       ansible.limit = 'vagrant'
 
       #   dynamic ansible-playbook configuration based on environment variables
-      ansible.tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_TAGS']
-      ansible.skip_tags = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
+      ansible.tags = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_TAGS']
+      ansible.skip_tags = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_SKIP_TAGS']
       #   dynamic ansible-playbook configuration based on environment variables or user configuration
-      ansible.verbose = ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_VERBOSE'] || c['provisioner']['ansible']['verbose']
+      ansible.verbose = ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_VERBOSE'] || c['provisioner']['ansible']['verbose']
 
       # ansible-playbook raw arguments
       ansible.raw_arguments = []
 
-      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
+      if ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_CHECKMODE'] == '1'
         ansible.raw_arguments << '--check'
       end
 
-      if ENV['{{ role_prefix|upper }}_{{ role_name_nodash|upper }}_VAGRANT_ANSIBLE_DIFFMODE'] == '1' or c['provisioner']['ansible']['diff']
+      if ENV['{{ role_name_tdd|upper }}_VAGRANT_ANSIBLE_DIFFMODE'] == '1' or c['provisioner']['ansible']['diff']
         ansible.raw_arguments << '--diff'
       end
 
