@@ -77,6 +77,6 @@ project_files:
 
 
 # helper vars to ease template and play management
-project_no_ssh_pipelining: False
+project_ssh_pipelining: true
 
 project_name_nodash: "{{ project_name|regex_replace('[^a-zA-Z0-9]', '') }}"
