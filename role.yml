@@ -15,10 +15,16 @@
 
     - name: Install Ansible role boilerplate
       tags: role
+      register: role_install_ansible_role_boilerplate
       command: "ansible-galaxy init --init-path {{ role_path }} {{ role_name_final }}"
       args:
         creates: "{{ role_dest }}"
 
+    - name: Configure force flag
+      tags: role
+      when: role_install_ansible_role_boilerplate.changed
+      set_fact:
+        force: true
 
     - name: Ensure role directories
       tags: role
