@@ -1,149 +1,79 @@
 ---
-- hosts: localhost
+- name: Install Ansible role boilerplate
+  hosts: localhost
   connection: local
   gather_facts: false
-  vars:
-    - role_name: ""
-    - role_path: ""
-    - role_prefix: 'ansible'
-    - update: false
-    - git: true
   tasks:
     - name: Verify user input for required variables
-      tags: role
+      tags: always
       assert:
         that:
-          - role_name !=  ""
-          - role_path !=  ""
-          - role_prefix in ['ansible', 'galaxy', 'silpion', 'infra']
+          - role_name is defined
+          - role_path is defined
+          - role_prefix|default('ansible') in role_allowed_role_prefixes
 
-    - name: Set role_name_nodash
-      tags: role
-      set_fact:
-        role_name_nodash: "{{ role_name|regex_replace('[^a-zA-Z0-9]', '') }}"
 
-    - name: Install Ansible role
+    - name: Install Ansible role boilerplate
       tags: role
-      command: "ansible-galaxy init --init-path {{ role_path }} {{ role_prefix }}-{{ role_name }}"
+      register: role_install_ansible_role_boilerplate
+      command: "ansible-galaxy init --init-path {{ role_path }} {{ role_name_final }}"
       args:
-        creates: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
+        creates: "{{ role_dest }}"
 
-    - name: Install .gitignore
+    - name: Configure force flag
       tags: role
-      copy:
-        mode: 0600
-        force: false
-        src: files/role/.gitignore
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/.gitignore"
+      when: role_install_ansible_role_boilerplate.changed
+      set_fact:
+        force: true
+
+    - name: Ensure role directories
+      tags: role
+      with_items: "{{ role_dirs }}"
+      file:
+        state: directory
+        dest: "{{ role_dest }}/{{ item }}"
 
     - name: Install static files
       tags: role
       with_items:
-        - CHANGELOG.md
-        - LICENSE
-        - VERSION
+        - "{{ role_files|selectattr('src', 'defined')|list }}"
+        - "{{ role_files|selectattr('content', 'defined')|list }}"
       copy:
-        mode: 0600
-        force: false
-        src: "files/role/{{ item }}"
-        dest: "{{ role_path }}/{{ role_prefix }}-{{ role_name }}/{{ item }}"
+        src: "{{ item.src|default(omit) }}"
+        dest: "{{ role_dest }}/{{ item.dest|mandatory }}"
+        mode: "{{ item.mode|default(0600) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
+        content: "{{ item.content|default(omit) }}"
 
-    - name: Install directories
+    - name: Install templated files
       tags: role
-      with_items:
-        - rake
-        - scripts
-        - spec/default
-        - spec/lib
-        - tests
+      with_items: "{{ role_files|selectattr('template', 'defined')|list }}"
+      template:
+        src: "templates/{{ item.template }}"
+        dest: "{{ role_dest }}/{{ item.dest|mandatory }}"
+        mode: "{{ item.mode|default(0600) }}"
+        force: "{{ force|default(item.force)|default(false) }}"
+
+
+    - name: Ensure state absent
+      tags: role
+      with_items: "{{ role_files_absent }}"
       file:
-        state: directory
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
+        state: absent
+        dest: "{{ item }}"
 
-    - name: Install static files for TDD
-      tags: role
-      with_items:
-        - ansible.cfg
-        - Gemfile
-        - rake/docker.rb
-        - Rakefile
-        - spec/lib/docker.rb
-        - spec/lib/vagrant.rb
-        - spec/spec_helper.rb
-        - tests/hosts
-        - tests/silpion-insecure-private-key
-        - .travis.yml
-      copy:
-        mode: 0600
-        src: "files/role/{{ item }}"
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
-    - name: Install templates
-      tags: role
-      with_items:
-        - README.md
-        - tests/playbook.yml
-        - vars/main.yml
-      when: not update
-      template:
-        mode: 0600
-        src: "templates/role/{{ item }}.j2"
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
+    - name: Include tasks to manage git
+      tags:
+        - role
+        - git
+      when: role_manage_with_git
+      include: tasks/git.yml
+      vars:
+        target: "{{ role_dest }}"
 
-    - name: Install templates for TDD
-      tags: role
-      with_items:
-        - tests/docker.yml
-        - Vagrantfile
-        - envvars-vagrant.sample
-        - rake/vagrant.rb
-      template:
-        mode: 0600
-        src: "templates/role/{{ item }}.j2"
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
 
-    - name: Install spec integration test file
-      tags: role
-      copy:
-        mode: 0600
-        force: false
-        src: files/role/spec/default/rolename_spec.rb
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/spec/default/{{ role_name }}_spec.rb"
-
-    - name: Install scripts
-      tags: role
-      with_items:
-        - scripts/release.sh
-      copy:
-        mode: 0755
-        src: "files/role/{{ item }}"
-        dest: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/{{ item }}"
-
-    - name: git init...
-      tags: role
-      when: git
-      register: generater_git_init
-      command: git init
-      args:
-        chdir: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
-        creates: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}/.git"
-
-    - name: git add...
-      tags: role
-      register: generator_git_add
-      when: generater_git_init.changed
-      command: git add .
-      args:
-        chdir: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
-
-    - name: git commit...
-      tags: role
-      when: generator_git_add.changed
-      command: git commit -m 'Root commit (ansible-generator)'
-      args:
-        chdir: "{{ role_path }}/{{ role_prefix}}-{{ role_name }}"
-
-    - name: echo {{ role_path }}/{{ role_prefix }}-{{ role_name }}
+    - name: baem!
       tags: role
       debug:
-        msg: "Find the Ansible role at {{ role_path }}/{{ role_prefix }}-{{ role_name }}"
+        msg: "Find the Ansible role at {{ role_dest }}"

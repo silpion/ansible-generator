@@ -5,6 +5,7 @@ Gemfile.lock
 
 # Vagrant
 /\.vagrant/
+/tests/roles/
 
 # IntelliJ IDEA
 /*\.ipr

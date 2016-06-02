@@ -1,3 +1,36 @@
+# 1.1.0
+
+Alvaro Aleman (2):
+
+* Dont enable public bridging by default
+* Use a dedicated dictionary for network configuration in project Vagrantfile
+
+Mark Kusch (23):
+
+* Fix reference to non-existing key in hash for 'ip'
+* Fix references to non-existing key in hash for 'ports'
+* Fixup comments according to networking configuration updates
+* Add user configuration support with vagrant-nugrant plugin
+* Remove duplicated line for check mode environment variable
+* Major Vagrantfile/ansible-galaxy management enhancements
+* Use centos/7 as default VM for building Ansible roles
+* Fixup ansible roles\_path
+* Add silpion.lib as default dependency when boilerplating roles
+* Provide name attribute for role play
+* Remove files installed for docker based TDD
+* Minor updates to documentation for variable names
+* Re-use mechanics from project generation when re-defining role generator
+* Allow project generator to configure mode for project\_files
+* Rename test playbook according to galaxy-generated travis integration
+* Allow to force override files
+* Use markdown code block with syntax highlighting in documentation
+* Re-integrate role\_name\_tdd variable after merge from next
+* Remove docker from rake infrastructure
+* Allow vagrant to find the test playbook
+* Re-add requirements file gone missing after merge
+* Do not negate ssh\_pipelining variable
+* Force overrides if ansible-galaxy init is not skipped
+
 # 1.0.0
 
 Anja Siek (24):
