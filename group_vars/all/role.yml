@@ -2,6 +2,16 @@
 # whether to git init a freshly created role
 role_manage_with_git: true
 
+# role meta data
+role_company: 'http://silpion.de'
+role_license: 'Apache 2'
+role_min_ansible_version: '2.0.0.2'
+
+# role dependencies
+role_dependencies:
+  - src: https://github.com/silpion/ansible-lib
+    name: silpion.lib
+
 # roles have prefixes - protect prefix misuse
 role_allowed_role_prefixes:
   - ansible
@@ -53,8 +63,20 @@ role_files:
     template: role/README.md.j2
     force: false
 
+  - dest: tasks/main.yml
+    template: role/tasks/main.yml.j2
+    force: false
+
   - dest: vars/main.yml
     template: role/vars/main.yml.j2
+    force: false
+
+  - dest: meta/main.yml
+    template: role/meta/main.yml.j2
+    force: false
+
+  - dest: templates/facts.j2
+    template: role/templates/facts.j2
     force: false
 
   - dest: scripts/release.sh

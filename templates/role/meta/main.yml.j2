@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author:
+  description:
+  company: "{{ role_company }}"
+  license: "{{ role_license }}"
+  min_ansible_version: "{{ role_min_ansible_version }}"
+  issue_tracker_url:
+  github_branch: master
+  galaxy_tags: []
+  platforms: {}
+
+
+dependencies:
+{% for dep in role_dependencies %}
+  - src: {{ dep.src|mandatory }}
+    name: {{ dep.name|mandatory }}
+{% endfor %}
+
+
+{% for line in role_meta_main.split('\n') %}
+{{ line|regex_replace('^', '#') }}
+{% endfor %}
