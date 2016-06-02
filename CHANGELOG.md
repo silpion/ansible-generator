@@ -1,3 +1,9 @@
+# 1.1.1
+
+Alvaro Aleman (1):
+
+* Disable project cows
+
 # 1.1.0
 
 Alvaro Aleman (2):
