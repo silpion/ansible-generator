@@ -1,0 +1,127 @@
+---
+# whether to git init a freshly created role
+role_manage_with_git: true
+
+# roles have prefixes - protect prefix misuse
+role_allowed_role_prefixes:
+  - ansible
+  - silpion
+  - infra
+  - pronto
+
+# install these directories in a role
+role_dirs:
+  - rake
+  - scripts
+  - spec/default
+  - spec/lib
+  - tests
+
+# role_files configures files to install
+#   This is a list of dictionaries which can decide whether files are
+#   installed with the template or the copy module.
+#
+#   - dest: .gitignore                            mandatory
+#     mode: 644                                   |default(0600)
+#     force: true                                 |default(false)
+#     src: files/role/.gitignore                  |default(omit)
+#     content: "foo"                              alternative to src
+#     template: templates/role/gitignore.j2       alternative to src or content: install dest with template module
+#
+#   template, src and content are mutualy exclusive for its meaning.
+#     There is no technical enforcement for this. It depends on Ansible
+#     what would happen if all keys are available for an item.
+#
+role_files:
+  - dest: .gitignore
+    src: files/role/.gitignore
+    force: true
+
+  - dest: CHANGELOG.md
+    src: files/role/CHANGELOG.md
+    force: false
+
+  - dest: LICENSE
+    src: files/role/LICENSE
+    force: true
+
+  - dest: VERSION
+    content: '0.1.0'
+    force: false
+
+  - dest: README.md
+    template: role/README.md.j2
+    force: false
+
+  - dest: vars/main.yml
+    template: role/vars/main.yml.j2
+    force: false
+
+  - dest: scripts/release.sh
+    src: files/role/scripts/release.sh
+    mode: '0755'
+    force: true
+
+  - dest: Vagrantfile
+    template: role/Vagrantfile.j2
+    force: true
+
+  - dest: envvars-vagrant.sample
+    template: role/envvars-vagrant.sample.j2
+    force: true
+
+  - dest: ansible.cfg
+    src: files/role/ansible.cfg
+    force: true
+
+  - dest: tests/test.yml
+    template: role/tests/test.yml.j2
+    force: false
+
+  - dest: tests/hosts
+    content: localhost
+    force: true
+
+  - dest: tests/requirements.yml
+    src: files/role/tests/requirements.yml
+    force: false
+
+  - dest: Gemfile
+    src: files/role/Gemfile
+    force: true
+
+  - dest: Rakefile
+    src: files/role/Rakefile
+    force: true
+
+  - dest: rake/vagrant.rb
+    template: role/rake/vagrant.rb.j2
+    force: true
+
+  - dest: spec/lib/vagrant.rb
+    src: files/role/spec/lib/vagrant.rb
+    force: true
+
+  - dest: spec/spec_helper.rb
+    src: files/role/spec/spec_helper.rb
+    force: true
+
+  - dest: spec/default/{{ role_name }}_spec.rb
+    src: files/role/spec/default/rolename_spec.rb
+    force: false
+
+
+# Temporary configuration to ensure files are getting removed from
+#   roles, e.g. for migration phases.
+role_files_absent:
+  - rake/docker.rb
+  - spec/lib/docker.rb
+  - tests/silpion-insecure-private-key
+  - tests/docker.yml
+
+
+# helper vars to ease template and play management
+role_name_nodash: "{{ role_name|regex_replace('[^a-zA-Z0-9]', '') }}"
+role_name_tdd: "{{ role_prefix|default('ansible') }}{{ role_name_nodash }}"
+role_name_final: "{{ role_prefix|default('ansible') }}-{{ role_name }}"
+role_dest: "{{ role_path }}/{{ role_name_final }}"

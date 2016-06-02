@@ -1,0 +1,31 @@
+---
+- name: git init "{{ target }}"
+  tags: git
+  register: registered_git_init
+  command: git init
+  args:
+    chdir: "{{ target }}"
+    creates: "{{ target }}/.git"
+
+- name: git add
+  tags: git
+  register: registered_git_add
+  when: registered_git_init.changed
+  command: git add .
+  args:
+    chdir: "{{ target }}"
+
+- name: git commit
+  tags: git
+  register: registered_git_commit
+  when: registered_git_add.changed
+  command: git commit -m 'Root commit (ansible-generator)'
+  args:
+    chdir: "{{ target }}"
+
+- name: git checkout -b next
+  tags: git
+  when: registered_git_commit.changed
+  command: git checkout -b next
+  args:
+    chdir: "{{ target }}"

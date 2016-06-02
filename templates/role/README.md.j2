@@ -1,4 +1,4 @@
-# {{ role_prefix }}-{{ role_name }}
+# {{ role_name_final }}
 
 ## Synopsis
 
@@ -35,9 +35,10 @@ Dependency variables documentation...
 ## Example Playbook
 
 ```yaml
-- hosts: all
+- name: Test {{ role_name_final }}
+  hosts: all
   roles:
-     - { role: {{ role_prefix}}-{{ role_name }} }
+    - {{ role_name_final }}
 ```
 
 ## Contributing
@@ -70,20 +71,7 @@ bundle install
 <!-- -->
 
 ```shell
-# run the complete test suite with Docker
 rake suite
-```
-
-<!-- -->
-
-```shell
-# run the complete test suite with Vagrant
-source  envvars-vagrant.sample
-rake suite
-
-# run the complete test suite with Vagrant without destroying the box afterwards
-source  envvars-vagrant.sample
-RAKE_ANSIBLE_VAGRANT_DONT_CLEANUP=1 rake suite
 ```
 
 
