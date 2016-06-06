@@ -1,4 +1,7 @@
 {{ '{{' }} ansible_managed|comment {{ '}}' }}
 
 [general]
+vendor = "{{ role_vendor }}"
+vendor_url = "{{ role_vendor_url }}"
+vendor_github = "{{ role_vendor_github }}"
 role_version = "{{ '{{' }} {{ role_name }}_role_version {{ '}}' }}"

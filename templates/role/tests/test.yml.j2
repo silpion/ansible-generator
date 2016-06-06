@@ -1,5 +1,5 @@
 ---
-- name: Test {{ role_name_final }}
+- name: Test {{ role_vendor|lower }}/{{ role_name_final }}
   hosts: all
   roles:
     - {{ role_name_final }}

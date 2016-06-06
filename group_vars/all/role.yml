@@ -3,7 +3,9 @@
 role_manage_with_git: true
 
 # role meta data
-role_company: 'http://silpion.de'
+role_vendor: Silpion
+role_vendor_url: 'http://silpion.de'
+role_vendor_github: 'https://github.com/silpion'
 role_license: 'Apache 2'
 role_min_ansible_version: '2.0.0.2'
 
