@@ -146,6 +146,6 @@ role_files_absent:
 
 # helper vars to ease template and play management
 role_name_nodash: "{{ role_name|regex_replace('[^a-zA-Z0-9]', '') }}"
-role_name_tdd: "{{ role_prefix|default('ansible') }}{{ role_name_nodash }}"
+role_name_tdd: "{{ role_prefix|default('ansible') }}_{{ role_name_nodash }}"
 role_name_final: "{{ role_prefix|default('ansible') }}-{{ role_name }}"
 role_dest: "{{ role_path }}/{{ role_name_final }}"
