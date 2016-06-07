@@ -65,7 +65,7 @@
       with_items: "{{ role_files_absent }}"
       file:
         state: absent
-        dest: "{{ item }}"
+        dest: "{{ role_dest }}/{{ item }}"
 
 
     - name: Include tasks to manage git
