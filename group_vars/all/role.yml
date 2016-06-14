@@ -23,7 +23,6 @@ role_allowed_role_prefixes:
 
 # install these directories in a role
 role_dirs:
-  - rake
   - scripts
   - spec/default
   - spec/lib
@@ -115,11 +114,7 @@ role_files:
     force: true
 
   - dest: Rakefile
-    src: files/role/Rakefile
-    force: true
-
-  - dest: rake/vagrant.rb
-    template: role/rake/vagrant.rb.j2
+    template: role/Rakefile.j2
     force: true
 
   - dest: spec/lib/vagrant.rb
@@ -138,7 +133,7 @@ role_files:
 # Temporary configuration to ensure files are getting removed from
 #   roles, e.g. for migration phases.
 role_files_absent:
-  - rake/docker.rb
+  - rake/
   - spec/lib/docker.rb
   - tests/silpion-insecure-private-key
   - tests/docker.yml
