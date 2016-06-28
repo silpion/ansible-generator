@@ -1,0 +1,13 @@
+---
+
+# Install role facts
+#   This should be the last tasks in main.yml.
+#   Add any other tasks above this one, if applicable.
+- name: Include facts management
+  tags:
+    - {{ role_name }}
+    - facts
+    - localfacts
+  include: "{{ '{{' }} playbook_dir {{ '}}' }}/roles/silpion.lib/tasks/localfacts.yml"
+  vars:
+    namespace: {{ role_name }}
