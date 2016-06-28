@@ -2,6 +2,18 @@
 # whether to git init a freshly created role
 role_manage_with_git: true
 
+# role meta data
+role_vendor: Silpion
+role_vendor_url: 'http://silpion.de'
+role_vendor_github: 'https://github.com/silpion'
+role_license: 'Apache 2'
+role_min_ansible_version: '2.0.0.2'
+
+# role dependencies
+role_dependencies:
+  - src: https://github.com/silpion/ansible-lib
+    name: silpion.lib
+
 # roles have prefixes - protect prefix misuse
 role_allowed_role_prefixes:
   - ansible
@@ -11,7 +23,6 @@ role_allowed_role_prefixes:
 
 # install these directories in a role
 role_dirs:
-  - rake
   - scripts
   - spec/default
   - spec/lib
@@ -53,8 +64,20 @@ role_files:
     template: role/README.md.j2
     force: false
 
+  - dest: tasks/main.yml
+    template: role/tasks/main.yml.j2
+    force: false
+
   - dest: vars/main.yml
     template: role/vars/main.yml.j2
+    force: false
+
+  - dest: meta/main.yml
+    template: role/meta/main.yml.j2
+    force: false
+
+  - dest: templates/facts.j2
+    template: role/templates/facts.j2
     force: false
 
   - dest: scripts/release.sh
@@ -91,11 +114,7 @@ role_files:
     force: true
 
   - dest: Rakefile
-    src: files/role/Rakefile
-    force: true
-
-  - dest: rake/vagrant.rb
-    template: role/rake/vagrant.rb.j2
+    template: role/Rakefile.j2
     force: true
 
   - dest: spec/lib/vagrant.rb
@@ -114,7 +133,7 @@ role_files:
 # Temporary configuration to ensure files are getting removed from
 #   roles, e.g. for migration phases.
 role_files_absent:
-  - rake/docker.rb
+  - rake/
   - spec/lib/docker.rb
   - tests/silpion-insecure-private-key
   - tests/docker.yml
@@ -122,6 +141,6 @@ role_files_absent:
 
 # helper vars to ease template and play management
 role_name_nodash: "{{ role_name|regex_replace('[^a-zA-Z0-9]', '') }}"
-role_name_tdd: "{{ role_prefix|default('ansible') }}{{ role_name_nodash }}"
+role_name_tdd: "{{ role_prefix|default('ansible') }}_{{ role_name_nodash }}"
 role_name_final: "{{ role_prefix|default('ansible') }}-{{ role_name }}"
 role_dest: "{{ role_path }}/{{ role_name_final }}"

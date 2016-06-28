@@ -20,6 +20,11 @@
       args:
         creates: "{{ role_dest }}"
 
+    - name: Read generated meta/main.yml
+      tags: role
+      set_fact:
+        role_meta_main: "{{ lookup('file', role_dest + '/meta/main.yml') }}"
+
     - name: Configure force flag
       tags: role
       when: role_install_ansible_role_boilerplate.changed
@@ -60,7 +65,7 @@
       with_items: "{{ role_files_absent }}"
       file:
         state: absent
-        dest: "{{ item }}"
+        dest: "{{ role_dest }}/{{ item }}"
 
 
     - name: Include tasks to manage git

@@ -1,3 +1,17 @@
+# 1.2.0
+
+Mark Kusch (9):
+
+* Add role\_version to local facts by default
+* Do not manage compiled Python binaries with Git
+* Add vendor variables/facts
+* Re-add underscore in ANSIBLE\_LIB\_ environment variable names
+* Fix bug when removing files
+* Fix vagrant bug with galaxy\_roles\_path
+* Flatten rake environment (no includes required anymore)
+* Repair serverspec infrastructure with Vagrant
+* Fix vagrantfile ansible.galaxy\_roles\_path for current Vagrant version 1.8.4
+
 # 1.1.1
 
 Alvaro Aleman (1):
