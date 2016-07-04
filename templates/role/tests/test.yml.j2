@@ -1,5 +1,16 @@
 ---
 - name: Test {{ role_vendor|lower }}/{{ role_name_final }}
   hosts: all
+  pre_tasks:
+    - name: Install aliases
+      become: true
+      with_items:
+        - "l='ls -lh'"
+        - "s=systemctl"
+        - "j=journalctl"
+      lineinfile:
+        state: present
+        dest: /root/.bashrc
+        line: "alias {{ item }}"
   roles:
     - {{ role_name_final }}

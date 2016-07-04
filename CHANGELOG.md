@@ -1,3 +1,13 @@
+# 1.2.1
+
+Alvaro Aleman (1):
+* Add alias installation to role testplaybook
+
+Mark Kusch (3):
+* Add journalctl alias in test playbook for roles
+* Ensure galaxy installs roles in tests/roles/ directory
+* Add state to role test playbooks for shell aliases
+
 # 1.2.0
 
 Mark Kusch (9):
