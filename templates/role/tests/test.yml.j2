@@ -9,6 +9,7 @@
         - "s=systemctl"
         - "j=journalctl"
       lineinfile:
+        state: present
         dest: /root/.bashrc
         line: "alias {{ item }}"
   roles:
