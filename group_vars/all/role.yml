@@ -130,7 +130,7 @@ role_files:
     force: true
 
   - dest: spec/default/{{ role_name }}_spec.rb
-    src: files/role/spec/default/rolename_spec.rb
+    template: role/spec/default/rolename_spec.rb.j2
     force: false
 
 
