@@ -117,6 +117,10 @@ role_files:
     template: role/Rakefile.j2
     force: true
 
+  - dest: .rspec
+    src: files/role/.rspec
+    force: true
+
   - dest: spec/lib/vagrant.rb
     src: files/role/spec/lib/vagrant.rb
     force: true
